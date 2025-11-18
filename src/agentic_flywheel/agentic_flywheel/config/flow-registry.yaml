@@ -1,0 +1,1454 @@
+metadata:
+  version: 1.1.0
+  created: '2025-07-25'
+  updated: '2025-09-02T00:25:23.505065'
+  description: Flow registry for flowise automation with creative orientation principles
+    and domain specialization
+  base_url: https://beagle-emerging-gnu.ngrok-free.app
+  auto_sync: true
+operational_flows:
+  csv2507:
+    id: 7d405a51-968d-4467-9ae6-d49bf182cdf9
+    name: CreerSaVieHelper with SCCP
+    description: From repo jgwill/CreerSaVieHelper branch kb2508 containing creative
+      orientation plus SCCP (Structural Consultation Certificate Program) sessions
+      with Character design patterns from Robert Fritz Structural Consultation
+    purpose: Apply creative orientation principles and SCCP methodologies focusing
+      on natural advancement through structural relationships
+    session_format: chat:csv2507:{uuid}
+    config:
+      temperature: 0.1
+      maxOutputTokens: 3000
+      rephrasePrompt: 'Transform this into a creative orientation inquiry focused
+        on desired outcomes: {question}'
+      responsePrompt: 'Guide using structural tension dynamics - what desired outcome
+        wants to emerge? Apply creative orientation principles focusing on natural
+        advancement through structural relationships: {context}'
+    intent_keywords:
+    - goal
+    - structural
+    - dream
+    - accomplish
+    - build
+    - vision
+    - achieve
+    - tension
+    - orientation
+    - outcome
+    - create
+    - result
+    - creative
+    - aspire
+    - plan
+    - sccp
+    - consultation
+    status: active
+    active: 1
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.6428571428571429
+      total_usage: 118
+    last_analyzed: '2025-09-02T00:25:22.407194'
+  faith2story2507:
+    id: 896f7eed-342e-4596-9429-6fb9b5fbd91b
+    name: Faith2Story
+    description: Transform faith experiences into narrative stories - previous version
+      of faith2academy, still valid with same knowledge base but different purpose
+    purpose: Guide the creation of meaningful stories from faith experiences and spiritual
+      journeys
+    session_format: chat:faith2story2507:{uuid}
+    config:
+      temperature: 0.3
+      maxOutputTokens: 4000
+      rephrasePrompt: 'Transform this faith experience into a narrative inquiry: {question}'
+      responsePrompt: 'Guide the creation of meaningful stories from faith experiences:
+        {context}'
+    intent_keywords:
+    - spiritual
+    - experience
+    - story
+    - meaning
+    - journey
+    - faith
+    - narrative
+    - path
+    - transformation
+    - grace
+    status: active
+    active: 1
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.4666666666666667
+      total_usage: 60
+    last_analyzed: '2025-09-02T00:25:22.407377'
+    performance_optimized: '2025-09-02T00:25:23.505048'
+  Research-Co-Agency:
+    id: 92b3d7ce-0eef-4be8-ad5b-b5d731cabf80
+    name: Co-Agency Research
+    description: Generic Co-Agency research with same knowledge vector as ResearchCoAgency_and_PolycentricAgenticLattice
+      but broader application
+    purpose: Support rigorous Co-Agency research through collaborative methodologies
+    session_format: chat:research-co-agency:{uuid}
+    config:
+      temperature: 0.3
+      maxOutputTokens: 5000
+      rephrasePrompt: 'Transform this into a structured Co-Agency research inquiry:
+        {question}'
+      responsePrompt: 'Provide rigorous Co-Agency analysis with proper methodology
+        and citations: {context}'
+    intent_keywords:
+    - research
+    - coagency
+    - academic
+    - analysis
+    - study
+    - investigation
+    - methodology
+    - collaboration
+    - scholarly
+    - evidence
+    - hypothesis
+    - literature
+    status: active
+    active: 1
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.5333333333333333
+      total_usage: 66
+    last_analyzed: '2025-09-02T00:25:22.407308'
+  ResearchRISEPolycentricAgenticLattice:
+    id: 054e3c7a-f9a9-4ce7-aa5e-05384cc602da
+    name: Polycentric Agentic Lattice RISE Research
+    description: Research on RISE Framework applied to Polycentric and Agentic Lattice
+      development
+    purpose: Support specialized research on Polycentric Agentic Lattice methodologies
+      using RISE framework
+    session_format: chat:research-rise-polycentric:{uuid}
+    config:
+      temperature: 0.3
+      maxOutputTokens: 5000
+      rephrasePrompt: 'Transform this into a Polycentric Agentic Lattice RISE research
+        inquiry: {question}'
+      responsePrompt: 'Provide rigorous RISE-based analysis for Polycentric Agentic
+        Lattice development: {context}'
+    intent_keywords:
+    - polycentric
+    - agentic
+    - lattice
+    - rise
+    - framework
+    - research
+    - methodology
+    - development
+    status: active
+    active: 1
+  faith2academy:
+    id: 75a12cd0-50fa-4d79-ab96-f0f08b573b8b
+    name: Faith to Academic Research
+    description: Faith-based academic research on Indigenous topics with WellBriety
+      reflections and cultural values
+    purpose: Support academic research on Indigenous topics integrating faith perspectives
+      and cultural values
+    session_format: chat:faith2academy:{uuid}
+    config:
+      temperature: 0.4
+      maxOutputTokens: 4000
+      rephrasePrompt: 'Transform this into a faith-based academic research inquiry:
+        {question}'
+      responsePrompt: 'Provide academic analysis integrating Indigenous wisdom, faith
+        perspectives, and cultural values: {context}'
+    intent_keywords:
+    - faith
+    - academic
+    - indigenous
+    - wellbriety
+    - cultural
+    - values
+    - research
+    - spiritual
+    - reflection
+    status: active
+    active: 1
+  ResearchCoAgency_and_PolycentricAgenticLattice:
+    id: f9d92b2a-8627-4003-a2dc-1a9c7a140061
+    name: Polycentric Agentic Lattice Research with CoAgency
+    description: Polycentric Agentic Lattice Research with the CoAgency Knowledge
+      based from various Academic researches
+    purpose: Research combining CoAgency knowledge base with Polycentric Agentic Lattice
+      methodologies
+    session_format: chat:research-coagency-polycentric:{uuid}
+    config:
+      temperature: 0.3
+      maxOutputTokens: 5000
+      rephrasePrompt: 'Transform this into a CoAgency and Polycentric Agentic Lattice
+        research inquiry: {question}'
+      responsePrompt: 'Provide analysis combining CoAgency research with Polycentric
+        Agentic Lattice methodologies: {context}'
+    intent_keywords:
+    - coagency
+    - polycentric
+    - agentic
+    - lattice
+    - research
+    - academic
+    - methodology
+    - collaboration
+    status: active
+    active: 1
+  miaAgentsDoc:
+    id: 41ffff21-418a-4bf1-bfe2-fb6c103930df
+    name: Mia Agents Documentation
+    description: Repository miadisabelle/mia-agents containing agent prompts for creative
+      orientation methodologies
+    purpose: Provide agent descriptions, task roles, and prompt engineering for creative
+      orientation integration
+    session_format: chat:mia-agents:{uuid}
+    config:
+      temperature: 0.4
+      maxOutputTokens: 3000
+      rephrasePrompt: 'Transform this into a mia-agents prompt engineering inquiry:
+        {question}'
+      responsePrompt: 'Provide agent descriptions and prompt engineering guidance
+        for creative orientation: {context}'
+    intent_keywords:
+    - agents
+    - prompts
+    - creative
+    - orientation
+    - methodology
+    - roles
+    - tasks
+    - engineering
+    - mia
+    status: active
+    active: 1
+  flow-fb8b27ca:
+    id: fb8b27ca-d5fc-4554-b5af-5a5547c2c1c2
+    name: Flow Fb8B27Ca Not for this usage, was for writing
+    description: Auto-discovered flow with 494 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-fb8b27ca:{uuid}
+    config:
+      temperature: 0.3
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow fb8b27ca inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow fb8b27ca: {context}'
+    intent_keywords: []
+    status: archived
+    active: 0
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.406867'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.2
+      total_usage: 494
+  clarification-deeper-flow:
+    id: f146d4f3-fa2c-4142-b4dd-d0db50170470
+    name: jynto - Clarification Deeper Flow
+    description: Auto-discovered flow with 12 messages and 0.8 success score (old,
+      might be useful if querying the archival callod jynto is asked.
+    purpose: Handles queries related to clarification, follow-up, more, deeper
+    session_format: chat:clarification-deeper-flow:{uuid}
+    config:
+      temperature: 0.4
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a clarification deeper flow inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for clarification deeper flow: {context}'
+    intent_keywords:
+    - clarification
+    - follow-up
+    - more
+    - deeper
+    status: archived
+    active: 0
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.409671'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 1.0
+      total_usage: 12
+  flow-e9890aba:
+    id: e9890aba-5dae-4315-a968-4e93c6ed845a
+    name: Flow E9890Aba
+    description: Auto-discovered flow with 166 messages and 0.8 success score.  DEPRECATED.
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-e9890aba:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow e9890aba inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow e9890aba: {context}'
+    intent_keywords: []
+    status: active
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.407006'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.6300000000000001
+      total_usage: 166
+    active: 0
+  flow-9b2890c6:
+    id: 9b2890c6-443f-46ba-a468-04d601a05bc3
+    name: Flow 9B2890C6 sw__241221__REVISION_MODEL
+    description: Auto-discovered flow with 156 messages and 0.8 success score. DEPRECATED,
+      was used as provider to write stories
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-9b2890c6:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 9b2890c6 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 9b2890c6: {context}'
+    intent_keywords: []
+    status: archived
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.407041'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.2
+      total_usage: 156
+    active: 0
+  flow-3288cc97:
+    id: 3288cc97-ff72-4e2c-9b2f-a550bae3bf74
+    name: Flow 3288Cc97 csvkb2412_2501
+    description: Auto-discovered flow with 92 messages and 0.8 success score. DEPRECATED.
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-3288cc97:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 3288cc97 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 3288cc97: {context}'
+    intent_keywords: []
+    status: active
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.407279'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.375
+      total_usage: 92
+    active: 0
+  rawill2411DocStore241119:
+    id: 5dd4dbbf-635d-4b97-86fe-1f7e9498391e
+    name: RaWill DocumentStore Agent
+    description: DocumentStore agent for querying the rawill repository. Good for
+      historical questions about rawill repo but archived for current use
+    purpose: Query and analyze rawill repository documentation and content
+    session_format: chat:rawill-docstore:{uuid}
+    config:
+      temperature: 0.4
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a rawill repository inquiry: {question}'
+      responsePrompt: 'Provide information from rawill repository documentation: {context}'
+    intent_keywords:
+    - rawill
+    - repository
+    - documentation
+    - docstore
+    - archive
+    - query
+    status: active
+    active: 1
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.407348'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.3454545454545454
+      total_usage: 60
+  flow-d7c1d4e2:
+    id: d7c1d4e2-efe7-4449-8f2d-2f59ef30a8be
+    name: Flow D7C1D4E2 ___chainVectorAgents_EXPLORING_241213
+    description: Auto-discovered flow with 54 messages and 0.8 success score.  DONT
+      USE, DEPRECATED
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-d7c1d4e2:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow d7c1d4e2 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow d7c1d4e2: {context}'
+    intent_keywords: []
+    status: active
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.407447'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.2909090909090909
+      total_usage: 54
+    active: 0
+  flow-e3ef674a:
+    id: e3ef674a-e139-44b4-887d-ee9d2c2a951a
+    name: Flow E3Ef674A  sw__241221__EVAL_MODEL
+    description: Auto-discovered flow with 54 messages and 0.8 success score. DONT
+      USE, was an jgwill/WillWrite Flowise provider flow
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-e3ef674a:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow e3ef674a inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow e3ef674a: {context}'
+    intent_keywords: []
+    status: archived
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.407475'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.2
+      total_usage: 54
+    active: 0
+  flow-f60dbba4:
+    id: f60dbba4-b5cb-48ba-b8ee-f434ff8ff7c3
+    name: Flow F60Dbba4  sw__241221__INITIAL_OUTLINE_WRITER_MODEL
+    description: Auto-discovered flow with 54 messages and 0.8 success score. DO NOT
+      USE. jgwill/WillWrite Flowise provider flow
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-f60dbba4:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow f60dbba4 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow f60dbba4: {context}'
+    intent_keywords: []
+    status: archived
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.407505'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.2
+      total_usage: 54
+    active: 0
+  flow-39d44025:
+    id: 39d44025-74aa-42cb-8261-23df77dd9582
+    name: Flow 39D44025 sw__241221__CHAPTER_OUTLINE_WRITER_MODEL
+    description: Auto-discovered flow with 50 messages and 0.8 success score. DO NOT
+      USE, jgwill/WillWrite Flowise provider flow
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-39d44025:{uuid}
+    config:
+      temperature: 0.3
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 39d44025 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 39d44025: {context}'
+    intent_keywords: []
+    status: archived
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.407533'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.2
+      total_usage: 50
+    active: 0
+  flow-f117e898:
+    id: f117e898-8079-414a-983c-d53d672f8a74
+    name: Flow F117E898 _o540_MovieDb_Experiment2501101310
+    description: Auto-discovered flow with 48 messages and 0.6 success score. DEPRECATED.
+      Was a Neo4j movie db query flow
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-f117e898:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow f117e898 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow f117e898: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.407649'
+    performance_metrics:
+      success_score: 0.5625
+      engagement_score: 1.0
+      total_usage: 48
+    active: 0
+  flow-f20f6ccd:
+    id: f20f6ccd-ba79-4aa4-8a9b-fb039a0e5e8d
+    name: Flow F20F6Ccd __upstashRedwill__scratching250312__
+    description: Auto-discovered flow with 46 messages and 0.8 success score.  DEPRECATED,
+      TO REMOVE.
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-f20f6ccd:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow f20f6ccd inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow f20f6ccd: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.407708'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.5666666666666667
+      total_usage: 46
+    active: 0
+  flow-c8075207:
+    id: c8075207-d7c3-45ee-8817-83c94fc37a9c
+    name: Flow C8075207  sw__241221__CHAPTER_STAGE2_WRITER_MODEL
+    description: Auto-discovered flow with 44 messages and 0.8 success score. DEPRECATED,
+      jgwill/WillWrite Flowise provider flow
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-c8075207:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow c8075207 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow c8075207: {context}'
+    intent_keywords: []
+    status: archived
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.407766'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.2
+      total_usage: 44
+    active: 0
+  flow-8cdc7808:
+    id: 8cdc7808-6e25-4355-a2ee-fc0b40617c58
+    name: Flow 8Cdc7808  QA250117_CSVOFaith
+    description: Auto-discovered flow with 38 messages and 0.7 success score. NOT
+      FUNCTIONAL, was an attempt to routing of Creating your live and Faith
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-8cdc7808:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 8cdc7808 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 8cdc7808: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.407881'
+    performance_metrics:
+      success_score: 0.7357763157894737
+      engagement_score: 0.3846153846153846
+      total_usage: 38
+    active: 0
+  flow-35ab316e:
+    id: 35ab316e-ad5a-4b29-b102-cb1a81389de2
+    name: Flow 35Ab316E NOT EXIST
+    description: Auto-discovered flow with 36 messages and 0.6 success score. TO DELETE
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-35ab316e:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 35ab316e inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 35ab316e: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.407967'
+    performance_metrics:
+      success_score: 0.5833333333333334
+      engagement_score: 1.0
+      total_usage: 36
+    active: 0
+  ResearchRISE:
+    id: 53dfcbb1-4ee5-40c9-b133-f326a4b728d2
+    name: RISE Framework Research
+    description: Research about RISE Framework (Reverse-Engineer-Intent-Specify-Export)
+      with theoretical framework on prompt-engineering and Software 3.0 development.
+      Complementary to ResearchRISEPolycentricAgenticLattice for specialized Polycentric
+      applications
+    purpose: Support RISE Framework research and Software 3.0 development methodologies
+    session_format: chat:research-rise:{uuid}
+    config:
+      temperature: 0.3
+      maxOutputTokens: 3000
+      rephrasePrompt: 'Transform this into a RISE framework research inquiry: {question}'
+      responsePrompt: 'Provide RISE methodology guidance for Software 3.0 development:
+        {context}'
+    intent_keywords:
+    - rise
+    - framework
+    - research
+    - reverse
+    - engineer
+    - intent
+    - specify
+    - export
+    - software
+    - development
+    - methodology
+    - prompt
+    - engineering
+    status: active
+    active: 1
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.407995'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.7
+      total_usage: 36
+  flow-729d0e37:
+    id: 729d0e37-e5f0-42d8-aed0-ebf62b370370
+    name: Flow 729D0E37  sw__241221__CHAPTER_STAGE3_WRITER_MODEL
+    description: Auto-discovered flow with 36 messages and 0.8 success score. DEPRECATED,
+      jgwill/WillWrite Flowise provider flow
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-729d0e37:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 729d0e37 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 729d0e37: {context}'
+    intent_keywords: []
+    status: archived
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.408025'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.2
+      total_usage: 36
+    active: 0
+  miadi46code:
+    id: aad975b2-289f-4acc-acc0-f19f4cfcb013
+    name: Miadi46Code
+    description: Auto-discovered flow with 34 messages and 0.8 success score. jgwill/Miadi
+      platform and correspond to the miadi-mcp-server from npmjs stored in jgwill/mcpfuse
+      ; question to for the knowlege vector of the jgwill/Miadi branch miadi46code
+      / Three-Pathway experimentation.  Fork of the original edgehub
+    purpose: Handles queries related to follow-up, more, develop, clarification, implement
+    session_format: chat:miadi46code:{uuid}
+    config:
+      temperature: 0.3
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a miadi46code inquiry: {question}'
+      responsePrompt: 'Provide technical guidance for implementation: {context}'
+    intent_keywords:
+    - follow-up
+    - more
+    - develop
+    - clarification
+    - implement
+    - deeper
+    - create
+    - build
+    - code
+    status: active
+    active: 1
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.408179'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.7714285714285714
+      total_usage: 34
+  flow-14d20aff:
+    id: 14d20aff-7ab6-4fd4-873b-b765b7c961da
+    name: Flow 14D20Aff  _does_DocumentStoreVector_CreerSaVie_Works__241213
+    description: Auto-discovered flow with 30 messages and 0.8 success score. DEPRECATED,
+      TO REMOVE
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-14d20aff:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 14d20aff inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 14d20aff: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.408327'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.22857142857142856
+      total_usage: 30
+    active: 0
+  flow-718f2acd:
+    id: 718f2acd-1733-4821-a2a3-aa449227ac62
+    name: Flow 718F2Acd  innu-aimun
+    description: Auto-discovered flow with 30 messages and 0.8 success score. innu-aimun
+      cultural, an early flow to learn to speak Innu-Aimun language, haha, might give
+      weard results or not
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-718f2acd:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 718f2acd inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 718f2acd: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.408414'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.4
+      total_usage: 30
+    active: 0
+  flow-f14a3d6b:
+    id: f14a3d6b-ed36-481a-abfb-26043fd6fbdc
+    name: Flow F14A3D6B  o540__storygraph_250110__Graph_Cypher_QA_Chain
+    description: Auto-discovered flow with 30 messages and 0.7 success score.  NOT
+      Useful, tested questionning a Neo4j graph db of storygraph data but the service
+      is offline, could be used as reference to create another flow with a live neo4j
+      instance in the future.
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-f14a3d6b:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow f14a3d6b inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow f14a3d6b: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.408443'
+    performance_metrics:
+      success_score: 0.6833
+      engagement_score: 0.55
+      total_usage: 30
+    active: 0
+  flow-7f910b7e:
+    id: 7f910b7e-7862-48cc-8828-b17ff7d2e60a
+    name: Flow 7F910B7E  sw__241221__SCRUB_MODEL
+    description: Auto-discovered flow with 28 messages and 0.8 success score. DEPRECATED,
+      jgwill/WillWrite Flowise provider flow
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-7f910b7e:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 7f910b7e inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 7f910b7e: {context}'
+    intent_keywords: []
+    status: archived
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.408471'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.23076923076923075
+      total_usage: 28
+    active: 0
+  flow-ec85d528:
+    id: ec85d528-a8e2-4877-abe5-ffa87b6400e8
+    name: Flow Ec85D528  storyPromptEngineering241128
+    description: Auto-discovered flow with 26 messages and 0.8 success score. DEPRECATED,
+      TO REMOVE
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-ec85d528:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow ec85d528 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow ec85d528: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.408532'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.45
+      total_usage: 26
+    active: 0
+  flow-a1a69223:
+    id: a1a69223-6ee2-42ad-9a42-7bca6254b0a5
+    name: Flow A1A69223
+    description: Auto-discovered flow with 24 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-a1a69223:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow a1a69223 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow a1a69223: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.408620'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.2
+      total_usage: 24
+    active: 0
+  flow-0b2adb2f:
+    id: 0b2adb2f-7dea-41a6-b644-022a32e757f0
+    name: Flow 0B2Adb2F
+    description: Auto-discovered flow with 22 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-0b2adb2f:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 0b2adb2f inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 0b2adb2f: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.408648'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.5333333333333333
+      total_usage: 22
+    active: 0
+  flow-c830a81f:
+    id: c830a81f-a8b9-49c7-9f2b-7d704b8c2924
+    name: Flow C830A81F
+    description: Auto-discovered flow with 22 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-c830a81f:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow c830a81f inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow c830a81f: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.408734'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.24000000000000005
+      total_usage: 22
+    active: 0
+  flow-0f0a421d:
+    id: 0f0a421d-28cd-4aa9-9918-5ec11637c107
+    name: Flow 0F0A421D
+    description: Auto-discovered flow with 20 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-0f0a421d:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 0f0a421d inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 0f0a421d: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.408761'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.4666666666666667
+      total_usage: 20
+    active: 0
+  flow-171fc502:
+    id: 171fc502-640a-44c1-88f9-ee46c6779931
+    name: Flow 171Fc502
+    description: Auto-discovered flow with 20 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-171fc502:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 171fc502 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 171fc502: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.408790'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.2
+      total_usage: 20
+    active: 0
+  flow-7373f913:
+    id: 7373f913-cd5f-4265-8b8d-3a657364e13b
+    name: Flow 7373F913
+    description: Auto-discovered flow with 20 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-7373f913:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 7373f913 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 7373f913: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.408817'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.2
+      total_usage: 20
+    active: 0
+  flow-a0f5ec22:
+    id: a0f5ec22-4cfe-4b02-af9a-c43fab74293d
+    name: Flow A0F5Ec22
+    description: Auto-discovered flow with 20 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-a0f5ec22:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow a0f5ec22 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow a0f5ec22: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.408845'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.24444444444444446
+      total_usage: 20
+    active: 0
+  flow-fa79b8b3:
+    id: fa79b8b3-7888-4122-a43d-3e11eaf5f8f1
+    name: Flow Fa79B8B3
+    description: Auto-discovered flow with 20 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-fa79b8b3:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow fa79b8b3 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow fa79b8b3: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.408931'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.3
+      total_usage: 20
+    active: 0
+  flow-0c1e5932:
+    id: 0c1e5932-a6db-4573-9aeb-6883d2684b34
+    name: Flow 0C1E5932
+    description: Auto-discovered flow with 18 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-0c1e5932:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 0c1e5932 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 0c1e5932: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.408958'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.31428571428571433
+      total_usage: 18
+    active: 0
+  flow-28a3e349:
+    id: 28a3e349-4699-4e48-9ff1-4bb5984a1dcd
+    name: Flow 28A3E349
+    description: Auto-discovered flow with 18 messages and 0.6 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-28a3e349:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 28a3e349 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 28a3e349: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.408986'
+    performance_metrics:
+      success_score: 0.59425
+      engagement_score: 1.0
+      total_usage: 18
+    active: 0
+  flow-cf3fd0d7:
+    id: cf3fd0d7-bda1-4366-8339-7a760d64638d
+    name: Flow Cf3Fd0D7
+    description: Auto-discovered flow with 18 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-cf3fd0d7:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow cf3fd0d7 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow cf3fd0d7: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.409090'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.31428571428571433
+      total_usage: 18
+    active: 0
+  flow-0068e6cc:
+    id: 0068e6cc-b94f-46fe-942f-6b26c388cd88
+    name: Flow 0068E6Cc
+    description: Auto-discovered flow with 16 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-0068e6cc:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 0068e6cc inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 0068e6cc: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.409124'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.6
+      total_usage: 16
+    active: 0
+  flow-3fe7dad7:
+    id: 3fe7dad7-7c54-4772-b6b8-cdca897e6d9b
+    name: Flow 3Fe7Dad7
+    description: Auto-discovered flow with 16 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-3fe7dad7:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 3fe7dad7 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 3fe7dad7: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.409184'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.44000000000000006
+      total_usage: 16
+    active: 0
+  flow-6af8f938:
+    id: 6af8f938-05eb-4e5b-aa2f-178a49532b87
+    name: Flow 6Af8F938
+    description: Auto-discovered flow with 16 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-6af8f938:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 6af8f938 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 6af8f938: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.409242'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.44000000000000006
+      total_usage: 16
+    active: 0
+  flow-1e086b98:
+    id: 1e086b98-faad-4587-864e-7ec646d42b3a
+    name: Flow 1E086B98
+    description: Auto-discovered flow with 14 messages and 0.6 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-1e086b98:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 1e086b98 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 1e086b98: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.409328'
+    performance_metrics:
+      success_score: 0.5776785714285715
+      engagement_score: 1.0
+      total_usage: 14
+    active: 0
+  flow-ef07999e:
+    id: ef07999e-5f1f-450e-b86a-fc804d7d1523
+    name: Flow Ef07999E
+    description: Auto-discovered flow with 14 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-ef07999e:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow ef07999e inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow ef07999e: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.409500'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.2
+      total_usage: 14
+    active: 0
+  flow-fd94f94b:
+    id: fd94f94b-040c-4ad0-a9c9-a55b24c71b9d
+    name: Flow Fd94F94B
+    description: Auto-discovered flow with 14 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-fd94f94b:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow fd94f94b inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow fd94f94b: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.409529'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.2666666666666667
+      total_usage: 14
+    active: 0
+  flow-2dcbc29f:
+    id: 2dcbc29f-dab2-4141-96a6-2f7db6692a27
+    name: Flow 2Dcbc29F
+    description: Auto-discovered flow with 12 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-2dcbc29f:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 2dcbc29f inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 2dcbc29f: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.409557'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.4
+      total_usage: 12
+    active: 0
+  flow-9dca0ac2:
+    id: 9dca0ac2-5146-4973-8cb6-0a6029065719
+    name: Flow 9Dca0Ac2
+    description: Auto-discovered flow with 12 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-9dca0ac2:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 9dca0ac2 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 9dca0ac2: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.409615'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.2
+      total_usage: 12
+    active: 0
+  flow-b7145fa7:
+    id: b7145fa7-720f-48b4-8169-b45ab8cbbf3f
+    name: Flow B7145Fa7
+    description: Auto-discovered flow with 12 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-b7145fa7:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow b7145fa7 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow b7145fa7: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.409642'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.4
+      total_usage: 12
+    active: 0
+  flow-03a79ab1:
+    id: 03a79ab1-a070-4035-b619-04334fae8744
+    name: Flow 03A79Ab1
+    description: Auto-discovered flow with 10 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-03a79ab1:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 03a79ab1 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 03a79ab1: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.409699'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.2
+      total_usage: 10
+    active: 0
+  flow-6482ac3c:
+    id: 6482ac3c-bc4f-4e29-bf98-2dd05d5723c4
+    name: Flow 6482Ac3C
+    description: Auto-discovered flow with 10 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-6482ac3c:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 6482ac3c inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 6482ac3c: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.409761'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.8
+      total_usage: 10
+    active: 0
+  flow-7de26713:
+    id: 7de26713-3d71-403f-b790-a97fe6d5a3bc
+    name: Flow 7De26713
+    description: Auto-discovered flow with 10 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-7de26713:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 7de26713 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 7de26713: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.409805'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.2
+      total_usage: 10
+    active: 0
+  flow-80a6aa99:
+    id: 80a6aa99-b934-4b49-8efa-eec00b381bb3
+    name: Flow 80A6Aa99
+    description: Auto-discovered flow with 10 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-80a6aa99:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 80a6aa99 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 80a6aa99: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.409835'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.8
+      total_usage: 10
+    active: 0
+  flow-8b4310d1:
+    id: 8b4310d1-7278-42e5-9016-c519e9544dab
+    name: Flow 8B4310D1
+    description: Auto-discovered flow with 10 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-8b4310d1:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 8b4310d1 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 8b4310d1: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.409865'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.4666666666666667
+      total_usage: 10
+    active: 0
+  flow-9df2c535:
+    id: 9df2c535-3798-427b-b574-4055b82c8009
+    name: Flow 9Df2C535
+    description: Auto-discovered flow with 10 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-9df2c535:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow 9df2c535 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow 9df2c535: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.409893'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 1.0
+      total_usage: 10
+    active: 0
+  flow-d0414f96:
+    id: d0414f96-6415-48a6-9bd5-1cb095eae28e
+    name: Flow D0414F96
+    description: Auto-discovered flow with 10 messages and 0.8 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-d0414f96:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow d0414f96 inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow d0414f96: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.409921'
+    performance_metrics:
+      success_score: 0.8
+      engagement_score: 0.2
+      total_usage: 10
+    active: 0
+  flow-e2b2f2cd:
+    id: e2b2f2cd-905e-4460-98b9-ad0f947a1797
+    name: Flow E2B2F2Cd
+    description: Auto-discovered flow with 10 messages and 0.7 success score
+    purpose: 'Handles queries related to '
+    session_format: chat:flow-e2b2f2cd:{uuid}
+    config:
+      temperature: 0.7
+      maxOutputTokens: 2000
+      rephrasePrompt: 'Transform this into a flow e2b2f2cd inquiry: {question}'
+      responsePrompt: 'Provide helpful guidance for flow e2b2f2cd: {context}'
+    intent_keywords: []
+    status: testing
+    auto_discovered: true
+    last_analyzed: '2025-09-02T00:25:22.409949'
+    performance_metrics:
+      success_score: 0.7162999999999999
+      engagement_score: 0.2
+      total_usage: 10
+    active: 0
+routing_flows:
+  document-qa:
+    id: document-qa-router-placeholder
+    name: Document Q&A Router
+    description: Intelligent routing system that analyzes queries and directs to appropriate
+      flows
+    purpose: Analyze user intent and route to optimal flow(s) or provide comprehensive
+      understanding by combining insights
+    session_format: chat:router:{uuid}
+    routing_logic:
+    - analyze_intent: true
+    - multi_flow_consultation: true
+    - context_aggregation: true
+    available_routes:
+    - creative-orientation
+    - faith2story
+    - technical-analysis
+    - external_knowledge_base
+    config:
+      temperature: 0.6
+      returnSourceDocuments: true
+      rephrasePrompt: 'Analyze this query to determine the most appropriate flow and
+        desired outcomes: {question}'
+      responsePrompt: 'Route to the optimal flow based on intent analysis, or provide
+        comprehensive understanding by combining insights from multiple specialized
+        flows: {context}'
+    intent_keywords:
+    - document
+    - search
+    - find
+    - information
+    - lookup
+    - reference
+    - research
+    - route
+    - analyze
+    - help
+    - general
+    status: conceptual
+  technical-analysis:
+    id: technical-analysis-placeholder
+    name: Technical Analysis Router
+    description: RISE framework integration for technical creative orientation
+    purpose: Apply RISE methodology to technical challenges with routing to specialized
+      resources
+    session_format: chat:technical:{uuid}
+    rise_integration:
+      phase1_reverse_engineering: Analyze current technical reality and constraints
+      phase2_innovation_strategy: Apply structural tension to technical desired outcomes
+      phase3_export_optimization: Create optimal technical solutions through advancement
+        patterns
+    routing_targets:
+    - cross_repo_rise_framework: /media/jgi/F/Dropbox/jgt/edu/llm_mastery/arenas_250706/cross_REPO_WORK__RISE/
+    - creative_orientation_flow: 7d405a51-968d-4467-9ae6-d49bf182cdf9
+    - technical_documentation: knowledge_base
+    config:
+      temperature: 0.3
+      returnSourceDocuments: true
+      maxOutputTokens: 2000
+      rephrasePrompt: 'What technical outcomes do you want to create using RISE methodology:
+        {question}'
+      responsePrompt: 'Apply RISE framework to technical challenges - what desired
+        technical outcomes emerge through structural relationships: {context}'
+    intent_keywords:
+    - code
+    - technical
+    - analyze
+    - debug
+    - programming
+    - software
+    - system
+    - rise
+    - framework
+    - development
+    status: conceptual
+session_management:
+  default_ttl: 3600
+  cleanup_interval: 300
+  uuid_generator: uuid4
+  session_storage: redis
+  session_prefix_formats:
+    operational: chat:{flow_name}:{uuid}
+    routing: chat:router:{uuid}
+    technical: chat:technical:{uuid}
+intent_classification:
+  method: keyword_weighted_scoring
+  fallback_flow: creative-orientation
+  confidence_threshold: 0.6
+  multi_flow_threshold: 0.8
+  scoring_weights:
+    exact_match: 3.0
+    partial_match: 1.5
+    semantic_similarity: 1.0
+    context_relevance: 2.0
+environment:
+  development:
+    base_url: http://localhost:3222
+    debug: true
+    logging_level: DEBUG
+  production:
+    base_url: https://beagle-emerging-gnu.ngrok-free.app
+    debug: false
+    logging_level: INFO
+  current: production
+integrations:
+  rise_framework:
+    path: /media/jgi/F/Dropbox/jgt/edu/llm_mastery/arenas_250706/cross_REPO_WORK__RISE/
+    enabled: true
+    auto_routing: true
+  mcp_server:
+    enabled: true
+    tools:
+    - flowise_query
+    - flowise_configure
+    - flowise_list_flows
+    - flowise_session_info
+    - flowise_domain_query
+    resources:
+    - flowise://flows
+    - flowise://sessions
+    - flowise://config-schema
+    - flowise://domain-templates
+  domain_specialization:
+    enabled: true
+    version: 1.1.0
+    description: Domain-specific context injection and intelligent routing
+    capabilities:
+    - automatic_context_injection
+    - domain_aware_intent_classification
+    - specialized_flow_routing
+    - context_type_selection
+    supported_context_types:
+    - technical
+    - cultural
+    - strategic
+    - general
+    gateway_endpoint: /api/v1/domain
+    mcp_tool: flowise_domain_query
+future_capabilities:
+  adaptive_learning:
+    description: Learn from user interactions to improve routing
+    status: planned
+  multi_agent_orchestration:
+    description: Coordinate multiple specialized agents for complex tasks
+    status: planned
+  workflow_automation:
+    description: Create multi-step workflows across flows
+    status: planned
+  context_preservation:
+    description: Maintain context across flow transitions
+    status: planned
