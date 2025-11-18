@@ -14,13 +14,23 @@ from .langfuse_tracer import (
     LangfuseScore,
     LangfuseTracerManager
 )
+from .redis_state import (
+    RedisSessionManager,
+    RedisExecutionCache,
+    RedisConfig
+)
 
 __all__ = [
+    # Tracing
     'trace_mcp_tool',
     'get_current_trace_id',
     'LangfuseObservation',
     'LangfuseScore',
-    'LangfuseTracerManager'
+    'LangfuseTracerManager',
+    # State persistence
+    'RedisSessionManager',
+    'RedisExecutionCache',
+    'RedisConfig'
 ]
 
 __version__ = '1.0.0'
