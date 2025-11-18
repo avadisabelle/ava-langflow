@@ -314,10 +314,4 @@ Choose your path:
 4. 🤝 **Coordinate** - Help integrate completed work
 
 The workspace awaits your creative contribution!
-" \\
-  /src/IAIP \\
-  /src/_sessiondata/ \\
-  /src/palimpsest/mia-agents/agents/ \\
-  /src/home/jgi/.claude \\
-  /src/palimpsest/skills-mia/ \\
-  a66f8bd2-29f5-461d-ad65-36b65252d469/
+" /src/IAIP /src/_sessiondata/ /src/palimpsest/mia-agents/agents/ /src/home/jgi/.claude /src/palimpsest/skills-mia/ a66f8bd2-29f5-461d-ad65-36b65252d469/
