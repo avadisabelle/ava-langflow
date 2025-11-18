@@ -251,28 +251,155 @@ class LangflowBackend(FlowBackend):
     def to_universal_flow(self, backend_flow: Any) -> UniversalFlow:
         """
         Converts a backend-specific flow representation (dict from Langflow API)
-        into the UniversalFlow format.
+        into the UniversalFlow format with intelligent capability inference.
         """
-        # This implementation is based on assumptions of the Langflow API response.
-        # The exact field names should be verified against a real API response.
         flow_id = backend_flow.get("id", "")
-        
-        # Placeholder for intent extraction logic.
-        # In a real implementation, we would parse the `backend_flow.get('data', {})`
-        # which contains the graph structure, to infer intents from node names, etc.
-        intent_keywords = []
+        name = backend_flow.get("name", "Unnamed Langflow Flow")
+        description = backend_flow.get("description", "")
+
+        # Extract intent keywords and capabilities from flow graph structure
+        intent_keywords = self._extract_intent_keywords(backend_flow)
+        capabilities = self._infer_capabilities_from_flow(backend_flow)
+        input_types, output_types = self._detect_io_types(backend_flow)
 
         return UniversalFlow(
-            id=f"langflow_{flow_id}",  # Create a unique universal ID
-            name=backend_flow.get("name", "Unnamed Langflow Flow"),
-            description=backend_flow.get("description", ""),
+            id=f"langflow_{flow_id}",
+            name=name,
+            description=description,
             backend=self.backend_type,
             backend_specific_id=flow_id,
             intent_keywords=intent_keywords,
-            capabilities=[], # Placeholder
-            input_types=[],  # Placeholder
-            output_types=[], # Placeholder
+            capabilities=capabilities,
+            input_types=input_types,
+            output_types=output_types,
         )
+
+    def _extract_intent_keywords(self, backend_flow: Dict[str, Any]) -> List[str]:
+        """
+        Extract intent keywords from flow name, description, and graph structure.
+        """
+        keywords = set()
+
+        # Extract from name and description
+        text = f"{backend_flow.get('name', '')} {backend_flow.get('description', '')}".lower()
+
+        # Common intent keyword patterns
+        intent_patterns = {
+            'chat': ['chat', 'conversation', 'dialog', 'talk'],
+            'rag': ['rag', 'retrieval', 'search', 'document', 'knowledge'],
+            'code': ['code', 'programming', 'development', 'script'],
+            'analysis': ['analyze', 'analysis', 'evaluate', 'assess'],
+            'generation': ['generate', 'create', 'produce', 'build'],
+            'translation': ['translate', 'translation', 'convert'],
+            'summarize': ['summarize', 'summary', 'condense'],
+            'question': ['question', 'qa', 'answer', 'ask'],
+        }
+
+        for intent, patterns in intent_patterns.items():
+            if any(pattern in text for pattern in patterns):
+                keywords.add(intent)
+
+        # Analyze graph nodes if available
+        data = backend_flow.get('data', {})
+        nodes = data.get('nodes', []) if isinstance(data, dict) else []
+
+        for node in nodes:
+            if isinstance(node, dict):
+                node_type = node.get('type', '').lower()
+                node_name = node.get('data', {}).get('node', {}).get('display_name', '').lower()
+
+                # Infer from node types
+                if 'llm' in node_type or 'chat' in node_type:
+                    keywords.add('chat')
+                if 'vector' in node_type or 'retriever' in node_type:
+                    keywords.add('rag')
+                    keywords.add('search')
+                if 'agent' in node_type:
+                    keywords.add('agent')
+                    keywords.add('autonomous')
+                if 'tool' in node_type:
+                    keywords.add('tools')
+                if 'prompt' in node_type:
+                    keywords.add('prompt')
+
+        return list(keywords)
+
+    def _infer_capabilities_from_flow(self, backend_flow: Dict[str, Any]) -> List[str]:
+        """
+        Infer flow capabilities from graph structure and components.
+        """
+        capabilities = set(['chat'])  # All Langflow flows support chat
+
+        # Analyze graph nodes
+        data = backend_flow.get('data', {})
+        nodes = data.get('nodes', []) if isinstance(data, dict) else []
+
+        for node in nodes:
+            if isinstance(node, dict):
+                node_type = node.get('type', '').lower()
+
+                # Capability inference rules
+                if any(kw in node_type for kw in ['vector', 'retriever', 'embedding']):
+                    capabilities.add('rag')
+                    capabilities.add('retrieval')
+
+                if 'agent' in node_type:
+                    capabilities.add('agent')
+                    capabilities.add('autonomous')
+
+                if any(kw in node_type for kw in ['tool', 'function', 'api']):
+                    capabilities.add('tool-use')
+
+                if any(kw in node_type for kw in ['code', 'python', 'javascript']):
+                    capabilities.add('code-execution')
+
+                if 'memory' in node_type or 'buffer' in node_type:
+                    capabilities.add('memory')
+
+                if 'output' in node_type or 'response' in node_type:
+                    capabilities.add('structured-output')
+
+        # Infer from flow metadata
+        description = backend_flow.get('description', '').lower()
+        if 'streaming' in description:
+            capabilities.add('streaming')
+        if 'multi' in description or 'multiple' in description:
+            capabilities.add('multi-step')
+
+        return list(capabilities)
+
+    def _detect_io_types(self, backend_flow: Dict[str, Any]) -> tuple[List[str], List[str]]:
+        """
+        Detect input and output types supported by the flow.
+        """
+        input_types = set(['text'])  # Default: all flows accept text
+        output_types = set(['text'])  # Default: all flows produce text
+
+        # Analyze graph nodes for special I/O types
+        data = backend_flow.get('data', {})
+        nodes = data.get('nodes', []) if isinstance(data, dict) else []
+
+        for node in nodes:
+            if isinstance(node, dict):
+                node_type = node.get('type', '').lower()
+
+                # Input type detection
+                if 'file' in node_type or 'document' in node_type:
+                    input_types.add('file')
+                if 'image' in node_type:
+                    input_types.add('image')
+                if 'json' in node_type or 'structured' in node_type:
+                    input_types.add('json')
+                if 'csv' in node_type:
+                    input_types.add('csv')
+
+                # Output type detection
+                if 'structured' in node_type or 'json' in node_type:
+                    output_types.add('structured')
+                if 'stream' in node_type:
+                    output_types.add('stream')
+
+        return list(input_types), list(output_types)
 
     def from_universal_flow(self, universal_flow: UniversalFlow) -> Any:
         # To be implemented
