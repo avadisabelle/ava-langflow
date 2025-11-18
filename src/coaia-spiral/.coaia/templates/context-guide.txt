@@ -1,0 +1,37 @@
+# COAIA Memory - Flexible Context-Based Chart Organization
+# Use different contexts for different areas of life/work (similar to original AIM approach)
+# Examples: charts-work.jsonl, charts-personal.jsonl, charts-health.jsonl, charts-learning.jsonl
+
+## Context Usage Examples:
+# Default/Master: charts.jsonl (no context specified) 
+# Work context: charts-work.jsonl (context: "work")
+# Personal context: charts-personal.jsonl (context: "personal") 
+# Health context: charts-health.jsonl (context: "health")
+# Learning context: charts-learning.jsonl (context: "learning")
+# Side projects: charts-side-projects.jsonl (context: "side-projects")
+
+## Available Tools:
+# create_chart_in_context - Create charts in specific contexts
+# list_charts_in_context - View charts in specific contexts  
+# list_coaia_projects - See all available contexts and chart counts
+# initialize_coaia_project - Set up flexible .coaia structure
+
+## Key Benefits vs Original Rigid Structure:
+# ✅ Multiple contexts for different life areas (work, personal, health, etc.)
+# ✅ Flexible creation - contexts created automatically as needed
+# ✅ Mirrors original AIM multi-database approach but for structural tension charts
+# ✅ Users can organize charts by any meaningful categorization
+
+## Structural Tension Methodology (Robert Fritz):
+# Focus on what you want to CREATE (not solve or fix)
+# Action steps ARE structural tension charts (can be telescoped) 
+# Current reality must be factual, not "ready to begin"
+# Desired outcomes should use creative language, not problem-solving language
+
+## Context Naming Suggestions:
+# Work: "work", "career", "business", "projects"
+# Personal: "personal", "family", "relationships", "home"
+# Health: "health", "fitness", "wellness", "medical"
+# Learning: "learning", "skills", "education", "training" 
+# Creative: "creative", "art", "music", "writing"
+# Financial: "financial", "investment", "budget", "wealth"

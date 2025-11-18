@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../../../../../../../../src/tst.WillWrite.spec.3"
+		},
+		{
+			"path": "../../../../../../../../../src/mcpfuse/miadi"
+		},
+		{
+			"path": "../co_lint"
+		}
+	],
+	"settings": {}
+}

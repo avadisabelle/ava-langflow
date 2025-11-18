@@ -1,0 +1,47 @@
+{
+  "name": "coaia-spiral",
+  "version": "3.0.2",
+  "description": "Creative-Oriented AI Assistant Memory - MCP server with structural tension charts and advancing spiral patterns, based on principles by Robert Fritz",
+  "license": "MIT",
+  "author": "J.Guillaume D.-Isabelle <jgi@jgwill.com> (https://github.com/jgwill)",
+  "contributors": [
+    "Shane Holloman (original mcp-knowledge-graph foundation)",
+    "Robert Fritz (structural tension methodology - https://robertfritz.com)"
+  ],
+  "homepage": "https://github.com/jgwill/coaia-spiral",
+  "bugs": "https://github.com/jgwill/coaia-spiral/issues",
+  "type": "module",
+  "bin": {
+    "coaia-spiral": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "assistant",
+    "memory",
+    "MCP",
+    "knowledge graph",
+    "structural tension",
+    "creative",
+    "creative-orientation",
+    "structural-dynamics",
+    "spiral"
+  ],
+  "scripts": {
+    "build": "npm run build:guidance && tsc && shx chmod +x dist/*.js",
+    "build:guidance": "node scripts/consolidate-guidance.js",
+    "prepare": "npm run build",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.0.1",
+    "minimist": "^1.2.8"
+  },
+  "devDependencies": {
+    "@types/minimist": "^1.2.5",
+    "@types/node": "^22.9.3",
+    "shx": "^0.3.4",
+    "typescript": "^5.6.2"
+  }
+}

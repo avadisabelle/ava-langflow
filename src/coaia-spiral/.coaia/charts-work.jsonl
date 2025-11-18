@@ -1,0 +1,9 @@
+# COAIA Charts for work context
+{"type":"entity","name":"chart_work_q4_chart","entityType":"structural_tension_chart","observations":["Q4 objectives structural tension chart"],"metadata":{"chartId":"chart_work_q4","dueDate":"2025-12-31","level":0,"context":"work","createdAt":"2025-09-16T08:10:00.000Z","updatedAt":"2025-09-16T08:10:00.000Z"}}
+{"type":"entity","name":"chart_work_q4_desired_outcome","entityType":"desired_outcome","observations":["Successfully complete all Q4 deliverables and establish strong foundation for next year growth"],"metadata":{"chartId":"chart_work_q4","dueDate":"2025-12-31","createdAt":"2025-09-16T08:10:00.000Z","updatedAt":"2025-09-16T08:10:00.000Z"}}
+{"type":"entity","name":"chart_work_q4_current_reality","entityType":"current_reality","observations":["Have 60% of deliverables in progress, team is focused and motivated, some dependencies on external partners"],"metadata":{"chartId":"chart_work_q4","createdAt":"2025-09-16T08:10:00.000Z","updatedAt":"2025-09-16T08:10:00.000Z"}}
+{"type":"entity","name":"chart_work_q4_action1","entityType":"action_step","observations":["Complete priority project alpha"],"metadata":{"chartId":"chart_work_q4","dueDate":"2025-10-15","createdAt":"2025-09-16T08:10:00.000Z","updatedAt":"2025-09-16T08:10:00.000Z"}}
+{"type":"entity","name":"chart_work_q4_action2","entityType":"action_step","observations":["Finalize partnership agreements"],"metadata":{"chartId":"chart_work_q4","dueDate":"2025-11-30","createdAt":"2025-09-16T08:10:00.000Z","updatedAt":"2025-09-16T08:10:00.000Z"}}
+{"type":"relation","from":"chart_work_q4_current_reality","to":"chart_work_q4_desired_outcome","relationType":"creates_tension_with"}
+{"type":"relation","from":"chart_work_q4_action1","to":"chart_work_q4_desired_outcome","relationType":"advances_toward"}
+{"type":"relation","from":"chart_work_q4_action2","to":"chart_work_q4_desired_outcome","relationType":"advances_toward"}

@@ -1,0 +1,15 @@
+# COAIA Memory - Structural Tension Chart Templates
+# Use different contexts for different areas of life/work
+# Examples: charts-work.jsonl, charts-personal.jsonl, charts-health.jsonl
+
+## Context Usage:
+# Default/Master: charts.jsonl (no context specified)
+# Work context: charts-work.jsonl (context: "work")
+# Personal context: charts-personal.jsonl (context: "personal")
+# Health context: charts-health.jsonl (context: "health")
+# Learning context: charts-learning.jsonl (context: "learning")
+
+## Template Patterns:
+# Focus on what you want to CREATE (not solve or fix)
+# Action steps ARE structural tension charts (can be telescoped)
+# Current reality must be factual, not "ready to begin"

@@ -1,0 +1,71 @@
+# COAIA Spiral - Structural Tension Chart Templates
+# Based on Robert Fritz's methodology for creative goal achievement
+# These patterns help create properly structured desired outcomes and action steps
+
+## Understanding Structural Tension Charts
+
+### Core Components:
+1. **Desired Outcome** - What you want to CREATE (not solve or fix)
+2. **Current Reality** - Honest, factual assessment of where you are now  
+3. **Action Steps** - Strategic secondary choices that support the primary choice
+
+### Critical Principle: Action Steps ARE Structural Tension Charts
+- Each action step becomes the "Desired Outcome" of its own telescoped chart
+- Action steps are NOT simple tasks - they are complete structural tension systems
+- Hierarchy: Master Chart (Level 0) → Telescoped Charts (Level 1) → Sub-telescoped Charts (Level 2)
+
+## Template Patterns
+
+### Learning/Skill Development Template:
+**Desired Outcome**: "Master [specific skill] to [specific application/context]"
+**Current Reality**: "Currently at [honest skill level] with [specific experience]"
+**Action Steps**: 
+- "Complete foundational understanding of [skill area]" (becomes telescoped chart)
+- "Apply knowledge through [specific project]" (becomes telescoped chart)
+- "Validate competency with [specific measurement]" (becomes telescoped chart)
+
+### Creative Project Template:
+**Desired Outcome**: "Create [specific deliverable] that [specific value/impact]"
+**Current Reality**: "Have [current resources/progress] and [current constraints/situation]"
+**Action Steps**:
+- "Develop clear vision and requirements" (becomes telescoped chart)
+- "Build working prototype/draft" (becomes telescoped chart)  
+- "Refine through feedback and iteration" (becomes telescoped chart)
+- "Launch and measure impact" (becomes telescoped chart)
+
+### System/Process Development Template:
+**Desired Outcome**: "Establish [specific system] that [specific capability]"
+**Current Reality**: "Current approach is [honest assessment] with [specific limitations]"
+**Action Steps**:
+- "Design system architecture and principles" (becomes telescoped chart)
+- "Implement core functionality" (becomes telescoped chart)
+- "Test and validate system performance" (becomes telescoped chart)
+- "Deploy and monitor system effectiveness" (becomes telescoped chart)
+
+### Relationship/Communication Template:
+**Desired Outcome**: "Establish [specific relationship dynamic] that [specific benefit]"
+**Current Reality**: "Current dynamic is [honest assessment] with [specific patterns]"
+**Action Steps**:
+- "Create shared understanding of desired outcome" (becomes telescoped chart)
+- "Implement new communication patterns" (becomes telescoped chart)
+- "Build trust through consistent actions" (becomes telescoped chart)
+- "Maintain and evolve relationship quality" (becomes telescoped chart)
+
+## Key Guidelines for Creative Orientation
+
+### ✅ Use Creative Language:
+- "Create", "Build", "Establish", "Achieve", "Develop"
+- Focus on what you want to bring into existence
+
+### ❌ Avoid Problem-Solving Language:
+- "Fix", "Solve", "Eliminate", "Prevent", "Stop", "Avoid"
+- These create oscillating patterns instead of advancing patterns
+
+### Current Reality Must Be Factual:
+- Not "Ready to begin" (this is readiness assumption)
+- Use "Currently have [specific status]", "Know [specific knowledge]", "Experience level is [honest assessment]"
+
+### Action Steps Are Strategic Secondary Choices:
+- Each action step is chosen BECAUSE it advances toward the desired outcome
+- Each can be telescoped into its own complete structural tension chart
+- They create momentum through the hierarchy of choices
