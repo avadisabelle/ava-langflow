@@ -287,4 +287,6 @@ member_servers.json
 **/.cache/lfx/
 
 # data files used for desktop registration
-data/user
+data/user.env*
+.mcp*
+.settings*
