@@ -268,6 +268,167 @@ Supports session continuity and automatic fallback on failures.""",
                 },
                 "required": ["session_id"]
             }
+        ),
+
+        # Task 5: Backend Management Tools
+        types.Tool(
+            name="backend_discover",
+            description="Discover and register available AI workflow backends from environment",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "config_path": {
+                        "type": "string",
+                        "description": "Optional path to backend configuration file"
+                    }
+                }
+            }
+        ),
+
+        types.Tool(
+            name="backend_connect",
+            description="Connect to a specific backend",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "backend_type": {
+                        "type": "string",
+                        "enum": ["flowise", "langflow"],
+                        "description": "Backend type to connect"
+                    },
+                    "base_url": {
+                        "type": "string",
+                        "description": "Backend base URL"
+                    },
+                    "api_key": {
+                        "type": "string",
+                        "description": "Optional API key"
+                    }
+                },
+                "required": ["backend_type", "base_url"]
+            }
+        ),
+
+        types.Tool(
+            name="backend_performance_compare",
+            description="Compare performance metrics across all backends",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "metric": {
+                        "type": "string",
+                        "enum": ["latency", "success_rate", "throughput"],
+                        "default": "latency",
+                        "description": "Metric to compare"
+                    },
+                    "time_range": {
+                        "type": "string",
+                        "enum": ["1h", "24h", "7d"],
+                        "default": "24h",
+                        "description": "Time range for comparison"
+                    }
+                }
+            }
+        ),
+
+        # Task 6: Admin Intelligence Tools
+        types.Tool(
+            name="flowise_admin_dashboard",
+            description="Get analytics dashboard with flow usage and performance metrics",
+            inputSchema={
+                "type": "object",
+                "properties": {}
+            }
+        ),
+
+        types.Tool(
+            name="flowise_analyze_flow",
+            description="Analyze performance metrics for a specific flow",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "flow_id": {
+                        "type": "string",
+                        "description": "Flow ID to analyze"
+                    }
+                },
+                "required": ["flow_id"]
+            }
+        ),
+
+        types.Tool(
+            name="flowise_discover_flows",
+            description="Discover flows from database with usage analytics",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "min_messages": {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Minimum message count"
+                    },
+                    "include_inactive": {
+                        "type": "boolean",
+                        "default": False,
+                        "description": "Include inactive flows"
+                    }
+                }
+            }
+        ),
+
+        types.Tool(
+            name="flowise_sync_config",
+            description="Sync flow registry with database-discovered flows",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "dry_run": {
+                        "type": "boolean",
+                        "default": True,
+                        "description": "Preview without applying"
+                    }
+                }
+            }
+        ),
+
+        types.Tool(
+            name="flowise_export_metrics",
+            description="Export flow performance metrics in structured format",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "format": {
+                        "type": "string",
+                        "enum": ["json", "csv"],
+                        "default": "json",
+                        "description": "Export format"
+                    },
+                    "flows": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Flow IDs to export (empty = all)"
+                    }
+                }
+            }
+        ),
+
+        types.Tool(
+            name="flowise_pattern_analysis",
+            description="Analyze conversation patterns to identify optimization opportunities",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "flow_id": {
+                        "type": "string",
+                        "description": "Analyze specific flow (optional)"
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "default": 100,
+                        "description": "Maximum patterns to analyze"
+                    }
+                }
+            }
         )
     ]
 
@@ -298,6 +459,35 @@ async def handle_call_tool(name: str, arguments: dict) -> List[types.TextContent
 
         elif name == "get_session":
             return await handle_get_session(arguments)
+
+        # Task 5: Backend Management Tools
+        elif name == "backend_discover":
+            return await handle_backend_discover(arguments)
+
+        elif name == "backend_connect":
+            return await handle_backend_connect(arguments)
+
+        elif name == "backend_performance_compare":
+            return await handle_backend_performance_compare(arguments)
+
+        # Task 6: Admin Intelligence Tools
+        elif name == "flowise_admin_dashboard":
+            return await handle_flowise_admin_dashboard(arguments)
+
+        elif name == "flowise_analyze_flow":
+            return await handle_flowise_analyze_flow(arguments)
+
+        elif name == "flowise_discover_flows":
+            return await handle_flowise_discover_flows(arguments)
+
+        elif name == "flowise_sync_config":
+            return await handle_flowise_sync_config(arguments)
+
+        elif name == "flowise_export_metrics":
+            return await handle_flowise_export_metrics(arguments)
+
+        elif name == "flowise_pattern_analysis":
+            return await handle_flowise_pattern_analysis(arguments)
 
         else:
             return [types.TextContent(
@@ -491,6 +681,432 @@ async def handle_get_session(arguments: dict) -> List[types.TextContent]:
 """
 
     return [types.TextContent(type="text", text=response_text)]
+
+
+# Task 5: Backend Management Tool Handlers
+
+async def handle_backend_discover(arguments: dict) -> List[types.TextContent]:
+    """Discover and register available backends"""
+
+    # Re-discover backends from environment
+    await universal_server.backend_registry.discover_backends()
+
+    # Try to connect to all discovered backends
+    backends_to_connect = {}
+
+    if os.getenv('FLOWISE_ENABLED', 'true').lower() == 'true':
+        flowise_config = {
+            'base_url': os.getenv('FLOWISE_API_URL', 'http://localhost:3000'),
+            'api_key': os.getenv('FLOWISE_API_KEY', '')
+        }
+        backends_to_connect[BackendType.FLOWISE] = flowise_config
+
+    if os.getenv('LANGFLOW_ENABLED', 'true').lower() == 'true':
+        langflow_config = {
+            'base_url': os.getenv('LANGFLOW_API_URL', 'http://localhost:7860'),
+            'api_key': os.getenv('LANGFLOW_API_KEY', '')
+        }
+        backends_to_connect[BackendType.LANGFLOW] = langflow_config
+
+    connection_results = await universal_server.backend_registry.connect_all_backends(backends_to_connect)
+
+    response_text = "**Backend Discovery Results**\n\n"
+
+    for backend_type, connected in connection_results.items():
+        status = "✅ Connected" if connected else "❌ Failed"
+        response_text += f"- {backend_type.value}: {status}\n"
+
+    connected_count = sum(connection_results.values())
+    total_count = len(connection_results)
+
+    response_text += f"\n**Summary**: {connected_count}/{total_count} backends connected"
+
+    return [types.TextContent(type="text", text=response_text)]
+
+
+async def handle_backend_connect(arguments: dict) -> List[types.TextContent]:
+    """Connect to a specific backend"""
+
+    backend_type_str = arguments["backend_type"]
+    base_url = arguments["base_url"]
+    api_key = arguments.get("api_key", "")
+
+    # Map string to BackendType enum
+    backend_type = BackendType.FLOWISE if backend_type_str == "flowise" else BackendType.LANGFLOW
+
+    # Connect to the backend
+    config = {"base_url": base_url, "api_key": api_key}
+    connection_results = await universal_server.backend_registry.connect_all_backends({backend_type: config})
+
+    connected = connection_results.get(backend_type, False)
+
+    if connected:
+        response_text = f"✅ Successfully connected to {backend_type_str} at {base_url}"
+
+        # Try to discover flows
+        try:
+            backend = universal_server.backend_registry.backends[backend_type]
+            flows = await backend.discover_flows()
+            response_text += f"\n\n**Discovered**: {len(flows)} flows"
+        except Exception as e:
+            response_text += f"\n\n⚠️ Connected but flow discovery failed: {str(e)}"
+    else:
+        response_text = f"❌ Failed to connect to {backend_type_str} at {base_url}"
+
+    return [types.TextContent(type="text", text=response_text)]
+
+
+async def handle_backend_performance_compare(arguments: dict) -> List[types.TextContent]:
+    """Compare performance metrics across backends"""
+
+    metric = arguments.get("metric", "latency")
+    time_range = arguments.get("time_range", "24h")
+
+    response_text = f"**Backend Performance Comparison**\n\n"
+    response_text += f"Metric: {metric}\n"
+    response_text += f"Time Range: {time_range}\n\n"
+
+    # Get all connected backends
+    backends = universal_server.backend_registry.backends
+
+    if not backends:
+        return [types.TextContent(
+            type="text",
+            text="No backends connected. Cannot compare performance."
+        )]
+
+    comparison_data = []
+
+    for backend_type, backend in backends.items():
+        if backend.is_connected:
+            # Get performance metrics
+            perf_metrics = backend.get_performance_metrics()
+
+            comparison_data.append({
+                "backend": backend_type.value,
+                "avg_latency_ms": perf_metrics.get("avg_latency_ms", 0),
+                "success_rate": perf_metrics.get("success_rate", 0),
+                "total_requests": perf_metrics.get("total_requests", 0)
+            })
+
+    if not comparison_data:
+        return [types.TextContent(
+            type="text",
+            text="No performance data available for connected backends."
+        )]
+
+    # Display comparison
+    for data in comparison_data:
+        response_text += f"**{data['backend'].upper()}**:\n"
+        response_text += f"- Average Latency: {data['avg_latency_ms']}ms\n"
+        response_text += f"- Success Rate: {data['success_rate']:.1%}\n"
+        response_text += f"- Total Requests: {data['total_requests']}\n\n"
+
+    # Add recommendation
+    if len(comparison_data) > 1:
+        best_latency = min(comparison_data, key=lambda x: x['avg_latency_ms'] if x['avg_latency_ms'] > 0 else float('inf'))
+        if best_latency['avg_latency_ms'] > 0:
+            response_text += f"**Recommendation**: {best_latency['backend']} shows best latency performance\n"
+
+    return [types.TextContent(type="text", text=response_text)]
+
+
+# Task 6: Admin Intelligence Tool Handlers
+
+async def handle_flowise_admin_dashboard(arguments: dict) -> List[types.TextContent]:
+    """Get Flowise admin dashboard data"""
+
+    try:
+        # Check if Flowise backend is available and connected
+        flowise_backend = universal_server.backend_registry.backends.get(BackendType.FLOWISE)
+
+        if not flowise_backend or not flowise_backend.is_connected:
+            return [types.TextContent(
+                type="text",
+                text="❌ Flowise backend not connected. Cannot access admin dashboard."
+            )]
+
+        # Get dashboard data from Flowise backend
+        dashboard_data = flowise_backend.get_admin_dashboard_data()
+
+        if "error" in dashboard_data:
+            return [types.TextContent(
+                type="text",
+                text=f"❌ Error retrieving dashboard: {dashboard_data['error']}"
+            )]
+
+        # Format response
+        response_text = "**Flowise Admin Dashboard**\n\n"
+
+        stats = dashboard_data.get("statistics", {})
+        response_text += f"**Statistics**:\n"
+        response_text += f"- Total Messages: {stats.get('total_messages', 0):,}\n"
+        response_text += f"- Total Flows: {stats.get('total_flows', 0)}\n"
+        response_text += f"- Active Flows: {stats.get('active_flows', 0)}\n"
+        response_text += f"- Date Range: {stats.get('earliest_date', 'N/A')} to {stats.get('latest_date', 'N/A')}\n\n"
+
+        # Top flows
+        top_flows = dashboard_data.get("top_flows", [])
+        if top_flows:
+            response_text += "**Top Flows by Usage**:\n"
+            for i, flow in enumerate(top_flows[:5], 1):
+                response_text += f"{i}. {flow.get('name', 'Unknown')}: {flow.get('message_count', 0)} messages\n"
+            response_text += "\n"
+
+        # Performance summary
+        perf = dashboard_data.get("performance_summary", {})
+        if perf:
+            response_text += "**Performance**:\n"
+            response_text += f"- Average Success Rate: {perf.get('avg_success_rate', 0):.1%}\n"
+            response_text += f"- Average Engagement: {perf.get('avg_engagement', 0):.1%}\n"
+
+        return [types.TextContent(type="text", text=response_text)]
+
+    except Exception as e:
+        logger.error(f"Dashboard error: {e}")
+        return [types.TextContent(
+            type="text",
+            text=f"❌ Error: {str(e)}"
+        )]
+
+
+async def handle_flowise_analyze_flow(arguments: dict) -> List[types.TextContent]:
+    """Analyze a specific Flowise flow"""
+
+    flow_id = arguments["flow_id"]
+
+    try:
+        flowise_backend = universal_server.backend_registry.backends.get(BackendType.FLOWISE)
+
+        if not flowise_backend or not flowise_backend.is_connected:
+            return [types.TextContent(
+                type="text",
+                text="❌ Flowise backend not connected."
+            )]
+
+        # Get flow analysis
+        analysis = flowise_backend.analyze_flow_performance(flow_id)
+
+        if "error" in analysis:
+            return [types.TextContent(
+                type="text",
+                text=f"❌ Error analyzing flow: {analysis['error']}"
+            )]
+
+        response_text = f"**Flow Analysis: {flow_id}**\n\n"
+
+        response_text += f"**Name**: {analysis.get('name', 'Unknown')}\n"
+        response_text += f"**Total Messages**: {analysis.get('message_count', 0)}\n"
+        response_text += f"**Success Score**: {analysis.get('success_score', 0):.2f}\n"
+        response_text += f"**Engagement Score**: {analysis.get('engagement_score', 0):.2f}\n"
+        response_text += f"**Status**: {analysis.get('status', 'Unknown')}\n\n"
+
+        # Recommendations
+        recommendations = analysis.get('recommendations', [])
+        if recommendations:
+            response_text += "**Recommendations**:\n"
+            for rec in recommendations:
+                response_text += f"- {rec}\n"
+
+        return [types.TextContent(type="text", text=response_text)]
+
+    except Exception as e:
+        logger.error(f"Flow analysis error: {e}")
+        return [types.TextContent(
+            type="text",
+            text=f"❌ Error: {str(e)}"
+        )]
+
+
+async def handle_flowise_discover_flows(arguments: dict) -> List[types.TextContent]:
+    """Discover Flowise flows from database"""
+
+    min_messages = arguments.get("min_messages", 10)
+    include_inactive = arguments.get("include_inactive", False)
+
+    try:
+        flowise_backend = universal_server.backend_registry.backends.get(BackendType.FLOWISE)
+
+        if not flowise_backend or not flowise_backend.is_connected:
+            return [types.TextContent(
+                type="text",
+                text="❌ Flowise backend not connected."
+            )]
+
+        # Discover flows from database
+        flows = flowise_backend.discover_flows_from_database(
+            min_messages=min_messages,
+            include_inactive=include_inactive
+        )
+
+        response_text = f"**Discovered Flows** (min messages: {min_messages})\n\n"
+
+        if flows:
+            for flow in flows:
+                status_icon = "✅" if flow.get('active') else "⚠️"
+                response_text += f"{status_icon} **{flow.get('name', 'Unknown')}**\n"
+                response_text += f"   ID: {flow.get('id', 'unknown')}\n"
+                response_text += f"   Messages: {flow.get('message_count', 0)}\n"
+                response_text += f"   Success Score: {flow.get('success_score', 0):.2f}\n\n"
+
+            response_text += f"**Total**: {len(flows)} flows discovered"
+        else:
+            response_text += "No flows found matching criteria."
+
+        return [types.TextContent(type="text", text=response_text)]
+
+    except Exception as e:
+        logger.error(f"Flow discovery error: {e}")
+        return [types.TextContent(
+            type="text",
+            text=f"❌ Error: {str(e)}"
+        )]
+
+
+async def handle_flowise_sync_config(arguments: dict) -> List[types.TextContent]:
+    """Sync Flowise flow registry with database"""
+
+    dry_run = arguments.get("dry_run", True)
+
+    try:
+        flowise_backend = universal_server.backend_registry.backends.get(BackendType.FLOWISE)
+
+        if not flowise_backend or not flowise_backend.is_connected:
+            return [types.TextContent(
+                type="text",
+                text="❌ Flowise backend not connected."
+            )]
+
+        # Perform sync
+        sync_result = flowise_backend.sync_flow_configurations(dry_run=dry_run)
+
+        if "error" in sync_result:
+            return [types.TextContent(
+                type="text",
+                text=f"❌ Sync error: {sync_result['error']}"
+            )]
+
+        mode = "Preview" if dry_run else "Applied"
+        response_text = f"**Flow Configuration Sync - {mode}**\n\n"
+
+        response_text += f"**Changes**:\n"
+        response_text += f"- Flows to Add: {sync_result.get('flows_to_add', 0)}\n"
+        response_text += f"- Flows to Update: {sync_result.get('flows_to_update', 0)}\n"
+        response_text += f"- Flows to Remove: {sync_result.get('flows_to_remove', 0)}\n\n"
+
+        if dry_run:
+            response_text += "ℹ️ This was a preview. Set dry_run=false to apply changes."
+
+        return [types.TextContent(type="text", text=response_text)]
+
+    except Exception as e:
+        logger.error(f"Sync error: {e}")
+        return [types.TextContent(
+            type="text",
+            text=f"❌ Error: {str(e)}"
+        )]
+
+
+async def handle_flowise_export_metrics(arguments: dict) -> List[types.TextContent]:
+    """Export Flowise flow metrics"""
+
+    format_type = arguments.get("format", "json")
+    flow_ids = arguments.get("flows", [])
+
+    try:
+        flowise_backend = universal_server.backend_registry.backends.get(BackendType.FLOWISE)
+
+        if not flowise_backend or not flowise_backend.is_connected:
+            return [types.TextContent(
+                type="text",
+                text="❌ Flowise backend not connected."
+            )]
+
+        # Export metrics
+        metrics = flowise_backend.export_flow_metrics(
+            flow_ids=flow_ids if flow_ids else None,
+            format=format_type
+        )
+
+        if "error" in metrics:
+            return [types.TextContent(
+                type="text",
+                text=f"❌ Export error: {metrics['error']}"
+            )]
+
+        response_text = f"**Flow Metrics Export** ({format_type})\n\n"
+
+        if format_type == "json":
+            import json
+            response_text += "```json\n"
+            response_text += json.dumps(metrics, indent=2)
+            response_text += "\n```"
+        else:
+            response_text += metrics.get("csv_data", "No data")
+
+        return [types.TextContent(type="text", text=response_text)]
+
+    except Exception as e:
+        logger.error(f"Export error: {e}")
+        return [types.TextContent(
+            type="text",
+            text=f"❌ Error: {str(e)}"
+        )]
+
+
+async def handle_flowise_pattern_analysis(arguments: dict) -> List[types.TextContent]:
+    """Analyze conversation patterns"""
+
+    flow_id = arguments.get("flow_id")
+    limit = arguments.get("limit", 100)
+
+    try:
+        flowise_backend = universal_server.backend_registry.backends.get(BackendType.FLOWISE)
+
+        if not flowise_backend or not flowise_backend.is_connected:
+            return [types.TextContent(
+                type="text",
+                text="❌ Flowise backend not connected."
+            )]
+
+        # Analyze patterns
+        patterns = flowise_backend.analyze_conversation_patterns(
+            flow_id=flow_id,
+            limit=limit
+        )
+
+        if "error" in patterns:
+            return [types.TextContent(
+                type="text",
+                text=f"❌ Analysis error: {patterns['error']}"
+            )]
+
+        scope = f"Flow: {flow_id}" if flow_id else "All Flows"
+        response_text = f"**Conversation Pattern Analysis**\n{scope}\n\n"
+
+        # Common intents
+        intents = patterns.get("common_intents", [])
+        if intents:
+            response_text += "**Common Intents**:\n"
+            for intent in intents[:5]:
+                response_text += f"- {intent.get('intent', 'unknown')}: {intent.get('count', 0)} occurrences\n"
+            response_text += "\n"
+
+        # Recommendations
+        recommendations = patterns.get("optimization_recommendations", [])
+        if recommendations:
+            response_text += "**Optimization Opportunities**:\n"
+            for rec in recommendations:
+                response_text += f"- {rec}\n"
+
+        return [types.TextContent(type="text", text=response_text)]
+
+    except Exception as e:
+        logger.error(f"Pattern analysis error: {e}")
+        return [types.TextContent(
+            type="text",
+            text=f"❌ Error: {str(e)}"
+        )]
 
 
 async def main():
