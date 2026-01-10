@@ -1,0 +1,31 @@
+{
+  "mcpServers": {
+    "claude-plan-miette-perspective-chart": {     
+	 "command": "npx", 
+	 "args": ["-y", "coaia-memory@2.2.12", "--memory-path", "/src/memories/claude-plan-miette.jsonl"]
+    },
+    "coaiapy_aetherial": {
+      "command": "/opt/anaconda3/envs/src/bin/coaiapy-mcp",
+      "args": [ ],
+      "env": { 
+              "COAIAPY_ENV_PATH":"/src/.env"
+        }
+    },
+    "filesystem": {
+          "type": "stdio", "command": "npx",  "args": [
+            "@modelcontextprotocol/server-filesystem", 
+            "/src",
+            "/workspace",
+	    "/cesaret/book/_",
+	    "/src/Miadi-46",
+	    "/opt/binscripts",
+	    "/src/_sessiondata",
+	    "/w/CSV/kb2508",
+	    "/src/IAIP",
+	    "/src/holisticagnostic-narrative-context-protocol/"
+          ],         
+          "env": {}
+        }
+  }
+}
+

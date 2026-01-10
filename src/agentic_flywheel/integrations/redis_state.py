@@ -1,231 +1,159 @@
-#!/usr/bin/env python3
-"""
-Redis State Persistence for Agentic Flywheel
+"""Redis State Persistence for Session Continuity
 
-Provides session state persistence and execution caching via Redis (coaia-mcp tools).
-Enables cross-session conversation continuity.
-
-Usage:
-    from agentic_flywheel.integrations import RedisSessionManager
-
-    redis_mgr = RedisSessionManager(enabled=True, ttl_seconds=604800)
-    await redis_mgr.save_session(session)
-    restored = await redis_mgr.load_session(session_id)
-
-Specification: rispecs/integrations/redis_state.spec.md
+Provides persistent session storage via Redis for cross-session conversation continuity.
 """
 
+import os
 import json
 import logging
-import os
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 from dataclasses import asdict
 from datetime import datetime
 
-from ..backends import UniversalSession, BackendType, FlowStatus
+try:
+    import redis.asyncio as aioredis
+    REDIS_AVAILABLE = True
+except ImportError:
+    REDIS_AVAILABLE = False
+    logging.warning("redis package not available - Redis persistence will be disabled")
+
+try:
+    from ..backends.base import UniversalSession, FlowStatus, BackendType
+except ImportError:
+    # This try/except is for when this file is run directly for testing
+    from agentic_flywheel.backends.base import UniversalSession, FlowStatus, BackendType
+
 
 logger = logging.getLogger(__name__)
 
 
 class RedisConfig:
-    """Redis connection and persistence configuration"""
+    """Redis configuration from environment"""
 
     @staticmethod
     def from_env() -> Dict[str, Any]:
-        """
-        Load Redis configuration from environment variables
-
-        Environment Variables:
-            REDIS_STATE_ENABLED: Enable state persistence (default: true)
-            REDIS_SESSION_TTL_SECONDS: Session TTL (default: 604800 = 7 days)
-            REDIS_EXECUTION_TTL_SECONDS: Execution result TTL (default: 86400 = 1 day)
-            REDIS_KEY_PREFIX: Key prefix (default: agentic_flywheel)
-            REDIS_HOST: Redis host (default: localhost)
-            REDIS_PORT: Redis port (default: 6379)
-
-        Returns:
-            Configuration dictionary
-        """
+        """Load Redis config from environment variables"""
         return {
-            'enabled': os.getenv('REDIS_STATE_ENABLED', 'true').lower() == 'true',
-            'session_ttl': int(os.getenv('REDIS_SESSION_TTL_SECONDS', '604800')),  # 7 days
-            'execution_ttl': int(os.getenv('REDIS_EXECUTION_TTL_SECONDS', '86400')),  # 1 day
-            'key_prefix': os.getenv('REDIS_KEY_PREFIX', 'agentic_flywheel'),
+            'enabled': os.getenv('REDIS_ENABLED', 'true').lower() == 'true',
+            'ttl_seconds': int(os.getenv('REDIS_TTL_SECONDS', '604800')),  # 7 days default
             'host': os.getenv('REDIS_HOST', 'localhost'),
             'port': int(os.getenv('REDIS_PORT', '6379'))
         }
 
 
 class RedisSessionManager:
-    """
-    Manages session state persistence via Redis
-
-    Provides save/load/delete/list operations for UniversalSession objects.
-    Wraps coaia-mcp Redis tools (coaia_tash, coaia_fetch, etc.)
-    """
+    """Manages session state persistence via Redis"""
 
     def __init__(
         self,
         enabled: bool = True,
-        ttl_seconds: int = 604800,  # 7 days
-        key_prefix: str = "agentic_flywheel"
+        ttl_seconds: int = 604800,
+        host: str = "localhost",
+        port: int = 6379,
+        db: int = 0,
+        password: Optional[str] = None
     ):
         """
-        Initialize session manager
+        Initialize Redis session manager
 
         Args:
-            enabled: Whether persistence is enabled
-            ttl_seconds: Default TTL for session data (seconds)
-            key_prefix: Redis key prefix
+            enabled: Enable Redis persistence
+            ttl_seconds: Time-to-live for sessions (default: 7 days)
+            host: Redis host
+            port: Redis port
+            db: Redis database number
+            password: Redis password (optional)
         """
-        self.enabled = enabled
+        self.enabled = enabled and REDIS_AVAILABLE
         self.ttl_seconds = ttl_seconds
-        self.key_prefix = key_prefix
+        self._key_prefix = "agentic_flywheel:session:"
+        self._redis: Optional[aioredis.Redis] = None
+        self._host = host
+        self._port = port
+        self._db = db
+        self._password = password
 
-    def _make_session_key(self, session_id: str) -> str:
-        """Generate Redis key for session"""
-        return f"{self.key_prefix}:session:{session_id}"
+        if not REDIS_AVAILABLE and enabled:
+            logger.warning("Redis persistence requested but redis package not available")
+            self.enabled = False
+        elif not self.enabled:
+            logger.info("Redis session persistence disabled")
 
-    def _serialize_session(self, session: UniversalSession) -> str:
-        """
-        Serialize session to JSON string
+    async def _get_redis(self) -> Optional[aioredis.Redis]:
+        """Get or create Redis connection"""
+        if not self.enabled:
+            return None
 
-        Args:
-            session: UniversalSession to serialize
+        if self._redis is None:
+            try:
+                self._redis = await aioredis.from_url(
+                    f"redis://{self._host}:{self._port}/{self._db}",
+                    password=self._password,
+                    decode_responses=True,
+                    socket_connect_timeout=2.0,
+                    socket_timeout=2.0
+                )
+                # Test connection
+                await self._redis.ping()
+                logger.info(f"Connected to Redis at {self._host}:{self._port}")
+            except Exception as e:
+                logger.warning(f"Failed to connect to Redis: {e}")
+                self.enabled = False
+                return None
 
-        Returns:
-            JSON string
-        """
-        data = {
-            '_schema_version': '1.0',
-            'id': session.id,
-            'backend': session.backend.value,
-            'backend_session_id': session.backend_session_id,
-            'status': session.status.value if session.status else None,
-            'current_flow_id': session.current_flow_id,
-            'context': session.context,
-            'history': session.history,
-            'metadata': {
-                'created_at': session.created_at.isoformat() if hasattr(session, 'created_at') and session.created_at else None,
-                'last_active': datetime.now().isoformat()
-            }
-        }
-        return json.dumps(data)
+        return self._redis
 
-    def _deserialize_session(self, json_str: str) -> UniversalSession:
-        """
-        Deserialize JSON string to UniversalSession
-
-        Args:
-            json_str: JSON string
-
-        Returns:
-            UniversalSession object
-        """
-        data = json.loads(json_str)
-
-        # Reconstruct UniversalSession
-        return UniversalSession(
-            id=data['id'],
-            backend=BackendType(data['backend']),
-            backend_session_id=data['backend_session_id'],
-            status=FlowStatus(data['status']) if data.get('status') else FlowStatus.IDLE,
-            current_flow_id=data.get('current_flow_id'),
-            context=data.get('context', {}),
-            history=data.get('history', [])
-        )
-
-    async def _call_coaia_tash(self, key: str, data: str, ttl: int) -> bool:
-        """
-        Call coaia_tash MCP tool to store data in Redis
-
-        Args:
-            key: Redis key
-            data: Data to store (JSON string)
-            ttl: Time-to-live in seconds
-
-        Returns:
-            True if successful, False otherwise
-
-        Note:
-            In production, this calls the actual coaia_tash MCP tool.
-            In tests, this is mocked.
-        """
-        # This is a placeholder for MCP tool call
-        # In production, would use MCP client:
-        # result = await mcp_client.call_tool("coaia_tash", {"key": key, "data": data, "ttl": ttl})
-        logger.info(f"coaia_tash called: key={key}, ttl={ttl}, size={len(data)} bytes")
-        return True
-
-    async def _call_coaia_fetch(self, key: str) -> Optional[str]:
-        """
-        Call coaia_fetch MCP tool to retrieve data from Redis
-
-        Args:
-            key: Redis key
-
-        Returns:
-            Data string if found, None otherwise
-        """
-        logger.info(f"coaia_fetch called: key={key}")
-        return None  # Placeholder - mocked in tests
-
-    async def _call_coaia_list(self, pattern: str) -> List[str]:
-        """
-        Call coaia_list MCP tool to list keys matching pattern
-
-        Args:
-            pattern: Redis key pattern (supports wildcards)
-
-        Returns:
-            List of matching keys
-        """
-        logger.info(f"coaia_list called: pattern={pattern}")
-        return []  # Placeholder - mocked in tests
-
-    async def _call_coaia_drop(self, key: str) -> bool:
-        """
-        Call coaia_drop MCP tool to delete key from Redis
-
-        Args:
-            key: Redis key
-
-        Returns:
-            True if deleted, False otherwise
-        """
-        logger.info(f"coaia_drop called: key={key}")
-        return True  # Placeholder - mocked in tests
+    async def close(self):
+        """Close Redis connection"""
+        if self._redis:
+            await self._redis.close()
+            self._redis = None
 
     async def save_session(self, session: UniversalSession) -> bool:
         """
         Save session state to Redis
 
         Args:
-            session: UniversalSession to save
+            session: Session to persist
 
         Returns:
-            True if saved successfully, False otherwise
+            True if saved, False if disabled or failed
         """
         if not self.enabled:
-            logger.debug("Redis persistence disabled, skipping save")
+            return False
+
+        redis = await self._get_redis()
+        if not redis:
             return False
 
         try:
-            key = self._make_session_key(session.id)
-            data = self._serialize_session(session)
+            # Serialize session to JSON
+            session_data = {
+                'id': session.id,
+                'backend': session.backend.value,
+                'backend_session_id': session.backend_session_id,
+                'status': session.status.value,
+                'current_flow_id': session.current_flow_id,
+                'context': session.context,
+                'history': session.history,
+                'metadata': getattr(session, 'metadata', {}),
+                'created_at': getattr(session, 'created_at', datetime.utcnow().isoformat()),
+                'last_active': datetime.utcnow().isoformat()
+            }
 
-            success = await self._call_coaia_tash(key, data, self.ttl_seconds)
-
-            if success:
-                logger.info(f"Session saved: {session.id}")
-            else:
-                logger.warning(f"Session save failed: {session.id}")
-
-            return success
+            # Save to Redis with TTL
+            key = f"{self._key_prefix}{session.id}"
+            await redis.setex(
+                key,
+                self.ttl_seconds,
+                json.dumps(session_data, default=str)
+            )
+            logger.info(f"Saved session {session.id} to Redis (TTL: {self.ttl_seconds}s)")
+            return True
 
         except Exception as e:
-            logger.error(f"Error saving session {session.id}: {e}")
-            return False  # Fail gracefully
+            logger.warning(f"Failed to save session to Redis (non-blocking): {e}")
+            return False
 
     async def load_session(self, session_id: str) -> Optional[UniversalSession]:
         """
@@ -238,31 +166,53 @@ class RedisSessionManager:
             UniversalSession if found, None otherwise
         """
         if not self.enabled:
-            logger.debug("Redis persistence disabled, skipping load")
+            return None
+
+        redis = await self._get_redis()
+        if not redis:
             return None
 
         try:
-            key = self._make_session_key(session_id)
-            data = await self._call_coaia_fetch(key)
+            key = f"{self._key_prefix}{session_id}"
+            data_str = await redis.get(key)
 
-            if data is None:
-                logger.debug(f"Session not found: {session_id}")
+            if not data_str:
+                logger.debug(f"Session {session_id} not found in Redis")
                 return None
 
-            session = self._deserialize_session(data)
-            logger.info(f"Session loaded: {session_id}")
+            # Deserialize from JSON
+            session_data = json.loads(data_str)
+
+            # Reconstruct UniversalSession
+            session = UniversalSession(
+                id=session_data['id'],
+                backend=BackendType(session_data['backend']),
+                backend_session_id=session_data.get('backend_session_id'),
+                status=FlowStatus(session_data['status']),
+                current_flow_id=session_data.get('current_flow_id'),
+                context=session_data.get('context', {}),
+                history=session_data.get('history', [])
+            )
+
+            # Restore metadata if it exists
+            if 'metadata' in session_data:
+                session.metadata = session_data['metadata']
+            if 'created_at' in session_data:
+                session.created_at = session_data['created_at']
+
+            logger.info(f"Loaded session {session_id} from Redis")
             return session
 
         except Exception as e:
-            logger.error(f"Error loading session {session_id}: {e}")
-            return None  # Fail gracefully
+            logger.warning(f"Failed to load session from Redis (non-blocking): {e}")
+            return None
 
     async def delete_session(self, session_id: str) -> bool:
         """
         Delete session from Redis
 
         Args:
-            session_id: Session ID to delete
+            session_id: Session to delete
 
         Returns:
             True if deleted, False otherwise
@@ -270,27 +220,30 @@ class RedisSessionManager:
         if not self.enabled:
             return False
 
+        redis = await self._get_redis()
+        if not redis:
+            return False
+
         try:
-            key = self._make_session_key(session_id)
-            success = await self._call_coaia_drop(key)
-
-            if success:
-                logger.info(f"Session deleted: {session_id}")
+            key = f"{self._key_prefix}{session_id}"
+            result = await redis.delete(key)
+            if result > 0:
+                logger.info(f"Deleted session {session_id} from Redis")
+                return True
             else:
-                logger.warning(f"Session delete failed: {session_id}")
-
-            return success
+                logger.debug(f"Session {session_id} not found for deletion")
+                return False
 
         except Exception as e:
-            logger.error(f"Error deleting session {session_id}: {e}")
+            logger.warning(f"Failed to delete session from Redis: {e}")
             return False
 
     async def list_sessions(self, pattern: str = "*") -> List[str]:
         """
-        List all stored session IDs matching pattern
+        List stored session IDs
 
         Args:
-            pattern: Session ID pattern (supports wildcards)
+            pattern: Key pattern to match
 
         Returns:
             List of session IDs
@@ -298,66 +251,97 @@ class RedisSessionManager:
         if not self.enabled:
             return []
 
+        redis = await self._get_redis()
+        if not redis:
+            return []
+
         try:
-            key_pattern = f"{self.key_prefix}:session:{pattern}"
-            keys = await self._call_coaia_list(key_pattern)
+            # Use SCAN for safe iteration
+            search_pattern = f"{self._key_prefix}{pattern}"
+            session_ids = []
 
-            # Extract session IDs from keys
-            session_ids = [
-                key.replace(f"{self.key_prefix}:session:", "")
-                for key in keys
-            ]
+            cursor = 0
+            while True:
+                cursor, keys = await redis.scan(cursor, match=search_pattern, count=100)
+                for key in keys:
+                    # Extract session ID from key
+                    session_id = key.replace(self._key_prefix, "")
+                    session_ids.append(session_id)
 
-            logger.info(f"Listed {len(session_ids)} sessions")
+                if cursor == 0:
+                    break
+
+            logger.debug(f"Found {len(session_ids)} sessions matching pattern '{pattern}'")
             return session_ids
 
         except Exception as e:
-            logger.error(f"Error listing sessions: {e}")
+            logger.warning(f"Failed to list sessions from Redis: {e}")
             return []
 
 
 class RedisExecutionCache:
-    """
-    Caches flow execution results in Redis
-
-    Provides caching for individual execution results and execution history.
-    """
+    """Caches flow execution results"""
 
     def __init__(
         self,
         enabled: bool = True,
-        ttl_seconds: int = 86400,  # 1 day
-        key_prefix: str = "agentic_flywheel"
+        ttl_seconds: int = 3600,
+        host: str = "localhost",
+        port: int = 6379,
+        db: int = 0,
+        password: Optional[str] = None
     ):
         """
         Initialize execution cache
 
         Args:
-            enabled: Whether caching is enabled
-            ttl_seconds: Default TTL for cached data (seconds)
-            key_prefix: Redis key prefix
+            enabled: Enable Redis caching
+            ttl_seconds: Time-to-live for cached results (default: 1 hour)
+            host: Redis host
+            port: Redis port
+            db: Redis database number
+            password: Redis password (optional)
         """
-        self.enabled = enabled
+        self.enabled = enabled and REDIS_AVAILABLE
         self.ttl_seconds = ttl_seconds
-        self.key_prefix = key_prefix
+        self._key_prefix = "agentic_flywheel:execution:"
+        self._redis: Optional[aioredis.Redis] = None
+        self._host = host
+        self._port = port
+        self._db = db
+        self._password = password
 
-    def _make_execution_key(self, execution_id: str) -> str:
-        """Generate Redis key for execution result"""
-        return f"{self.key_prefix}:execution:{execution_id}"
+        if not REDIS_AVAILABLE and enabled:
+            logger.warning("Redis caching requested but redis package not available")
+            self.enabled = False
 
-    def _make_history_key(self, session_id: str, flow_id: str) -> str:
-        """Generate Redis key for execution history"""
-        return f"{self.key_prefix}:history:{session_id}:{flow_id}"
+    async def _get_redis(self) -> Optional[aioredis.Redis]:
+        """Get or create Redis connection"""
+        if not self.enabled:
+            return None
 
-    async def _call_coaia_tash(self, key: str, data: str, ttl: int) -> bool:
-        """Wrapper for coaia_tash (same as RedisSessionManager)"""
-        logger.info(f"coaia_tash called: key={key}, ttl={ttl}")
-        return True
+        if self._redis is None:
+            try:
+                self._redis = await aioredis.from_url(
+                    f"redis://{self._host}:{self._port}/{self._db}",
+                    password=self._password,
+                    decode_responses=True,
+                    socket_connect_timeout=2.0,
+                    socket_timeout=2.0
+                )
+                await self._redis.ping()
+            except Exception as e:
+                logger.warning(f"Failed to connect to Redis for caching: {e}")
+                self.enabled = False
+                return None
 
-    async def _call_coaia_fetch(self, key: str) -> Optional[str]:
-        """Wrapper for coaia_fetch"""
-        logger.info(f"coaia_fetch called: key={key}")
-        return None
+        return self._redis
+
+    async def close(self):
+        """Close Redis connection"""
+        if self._redis:
+            await self._redis.close()
+            self._redis = None
 
     async def cache_result(self, execution_id: str, result: Dict[str, Any]) -> bool:
         """
@@ -365,7 +349,7 @@ class RedisExecutionCache:
 
         Args:
             execution_id: Unique execution ID
-            result: Execution result dictionary
+            result: Execution result to cache
 
         Returns:
             True if cached, False otherwise
@@ -373,23 +357,22 @@ class RedisExecutionCache:
         if not self.enabled:
             return False
 
+        redis = await self._get_redis()
+        if not redis:
+            return False
+
         try:
-            key = self._make_execution_key(execution_id)
-            data = json.dumps({
-                'execution_id': execution_id,
-                'result': result,
-                'cached_at': datetime.now().isoformat()
-            })
-
-            success = await self._call_coaia_tash(key, data, self.ttl_seconds)
-
-            if success:
-                logger.info(f"Execution result cached: {execution_id}")
-
-            return success
+            key = f"{self._key_prefix}{execution_id}"
+            await redis.setex(
+                key,
+                self.ttl_seconds,
+                json.dumps(result, default=str)
+            )
+            logger.debug(f"Cached execution {execution_id}")
+            return True
 
         except Exception as e:
-            logger.error(f"Error caching execution result: {e}")
+            logger.warning(f"Failed to cache execution result: {e}")
             return False
 
     async def get_result(self, execution_id: str) -> Optional[Dict[str, Any]]:
@@ -405,63 +388,22 @@ class RedisExecutionCache:
         if not self.enabled:
             return None
 
-        try:
-            key = self._make_execution_key(execution_id)
-            data = await self._call_coaia_fetch(key)
-
-            if data is None:
-                return None
-
-            cached = json.loads(data)
-            return cached.get('result')
-
-        except Exception as e:
-            logger.error(f"Error retrieving cached result: {e}")
+        redis = await self._get_redis()
+        if not redis:
             return None
 
-    async def cache_flow_history(
-        self,
-        session_id: str,
-        flow_id: str,
-        executions: List[Dict[str, Any]]
-    ) -> bool:
-        """
-        Cache execution history for a session/flow combination
-
-        Args:
-            session_id: Session ID
-            flow_id: Flow ID
-            executions: List of execution records
-
-        Returns:
-            True if cached, False otherwise
-        """
-        if not self.enabled:
-            return False
-
         try:
-            key = self._make_history_key(session_id, flow_id)
-            data = json.dumps({
-                'session_id': session_id,
-                'flow_id': flow_id,
-                'executions': executions,
-                'cached_at': datetime.now().isoformat()
-            })
+            key = f"{self._key_prefix}{execution_id}"
+            data_str = await redis.get(key)
 
-            success = await self._call_coaia_tash(key, data, self.ttl_seconds)
+            if not data_str:
+                logger.debug(f"Execution {execution_id} not found in cache")
+                return None
 
-            if success:
-                logger.info(f"Flow history cached: {session_id}/{flow_id}")
-
-            return success
+            result = json.loads(data_str)
+            logger.debug(f"Retrieved cached execution {execution_id}")
+            return result
 
         except Exception as e:
-            logger.error(f"Error caching flow history: {e}")
-            return False
-
-
-__all__ = [
-    'RedisSessionManager',
-    'RedisExecutionCache',
-    'RedisConfig'
-]
+            logger.warning(f"Failed to retrieve cached result: {e}")
+            return None

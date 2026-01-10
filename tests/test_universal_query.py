@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Tests for Universal Query MCP Tool
+Tests for Universal Query MCP Tool and Routing Logic
 """
 
 import sys
@@ -11,104 +11,81 @@ src_path = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_path))
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
-from agentic_flywheel.mcp_tools.universal_query import (
-    UniversalQueryHandler,
+from agentic_flywheel.routing.router import (
+    UniversalRouter,
+    PerformanceTracker,
+    BackendScore,
     classify_intent,
-    calculate_flow_match_score,
-    get_capability_score,
-    RoutingDecision,
-    NoBackendsAvailable,
-    INTENT_CATEGORIES,
-    BACKEND_CAPABILITIES
+    extract_keywords
 )
-from agentic_flywheel.backends import (
-    FlowBackend,
-    BackendType,
-    UniversalFlow,
-    BackendRegistry
+from agentic_flywheel.backends.base import FlowBackend, BackendType, UniversalFlow
+from agentic_flywheel.tools.universal_query import (
+    handle_universal_query,
+    format_universal_response
 )
 
 
 # Test Fixtures
 
 @pytest.fixture
-def mock_backend_registry():
-    """Create a mock backend registry"""
-    registry = MagicMock(spec=BackendRegistry)
-    registry.backends = {}
-    return registry
-
-
-@pytest.fixture
 def mock_flowise_backend():
-    """Create a mock Flowise backend"""
-    backend = MagicMock(spec=FlowBackend)
+    """Create mock Flowise backend"""
+    backend = Mock(spec=FlowBackend)
     backend.backend_type = BackendType.FLOWISE
-    backend.is_connected = True
     backend.health_check = AsyncMock(return_value=True)
     backend.discover_flows = AsyncMock(return_value=[
         UniversalFlow(
-            id="flowise_creative",
-            name="Creative Flow",
-            description="Creative orientation flow",
+            id="flowise_flow1",
+            name="Creative Orientation",
+            description="Structural tension guidance",
             backend=BackendType.FLOWISE,
-            backend_specific_id="creative_001",
-            intent_keywords=["creative-orientation"],
+            backend_specific_id="flow1",
+            intent_keywords=["creative-orientation", "creative", "goal"],
             capabilities=[],
-            input_types=["text"],
-            output_types=["text"]),
+            input_types=[],
+            output_types=[]
+        ),
         UniversalFlow(
-            id="flowise_chat",
-            name="Chat Flow",
-            description="General conversation",
+            id="flowise_flow2",
+            name="Technical Analysis",
+            description="Code analysis",
             backend=BackendType.FLOWISE,
-            backend_specific_id="chat_001",
-            intent_keywords=["conversation"],
+            backend_specific_id="flow2",
+            intent_keywords=["technical-analysis", "code", "debug"],
             capabilities=[],
-            input_types=["text"],
-            output_types=["text"])
+            input_types=[],
+            output_types=[]
+        )
     ])
     backend.execute_flow = AsyncMock(return_value={
-        "result": "Flowise response",
-        "status": "success"
+        "result": "Structural tension is the gap between current reality and desired outcome."
     })
     return backend
 
 
 @pytest.fixture
 def mock_langflow_backend():
-    """Create a mock Langflow backend"""
-    backend = MagicMock(spec=FlowBackend)
+    """Create mock Langflow backend"""
+    backend = Mock(spec=FlowBackend)
     backend.backend_type = BackendType.LANGFLOW
-    backend.is_connected = True
     backend.health_check = AsyncMock(return_value=True)
     backend.discover_flows = AsyncMock(return_value=[
         UniversalFlow(
-            id="langflow_rag",
-            name="RAG Flow",
-            description="Document retrieval",
+            id="langflow_flow1",
+            name="Document QA",
+            description="Document search",
             backend=BackendType.LANGFLOW,
-            backend_specific_id="rag_001",
-            intent_keywords=["rag-retrieval"],
+            backend_specific_id="flow1",
+            intent_keywords=["document-qa", "search", "find"],
             capabilities=[],
-            input_types=["text"],
-            output_types=["text"]),
-        UniversalFlow(
-            id="langflow_technical",
-            name="Technical Analysis",
-            description="Code analysis",
-            backend=BackendType.LANGFLOW,
-            backend_specific_id="technical_001",
-            intent_keywords=["technical-analysis"],
-            capabilities=[],
-            input_types=["text"],
-            output_types=["text"])
+            input_types=[],
+            output_types=[]
+        )
     ])
     backend.execute_flow = AsyncMock(return_value={
-        "result": "Langflow response",
-        "status": "success"
+        "result": "Here is the document information you requested."
     })
     return backend
 
@@ -116,467 +93,418 @@ def mock_langflow_backend():
 # Intent Classification Tests
 
 def test_classify_intent_creative():
-    """Test creative intent classification"""
-    question = "Help me understand my creative vision and structural tension"
-    intent, confidence = classify_intent(question)
-
+    """Test intent classification for creative queries"""
+    question = "What is structural tension and how do I create desired outcomes?"
+    intent = classify_intent(question)
     assert intent == "creative-orientation"
-    assert confidence > 0.5
 
 
 def test_classify_intent_technical():
-    """Test technical intent classification"""
-    question = "Debug this code and analyze the function for errors"
-    intent, confidence = classify_intent(question)
-
+    """Test intent classification for technical queries"""
+    question = "How do I debug this error in my code?"
+    intent = classify_intent(question)
     assert intent == "technical-analysis"
-    assert confidence > 0.5
 
 
-def test_classify_intent_rag():
-    """Test RAG intent classification"""
-    question = "Search the documents and retrieve information about testing"
-    intent, confidence = classify_intent(question)
-
-    assert intent == "rag-retrieval"
-    assert confidence > 0.5
+def test_classify_intent_document():
+    """Test intent classification for document queries"""
+    question = "Find information about the project documentation"
+    intent = classify_intent(question)
+    assert intent == "document-qa"
 
 
-def test_classify_intent_conversation():
-    """Test conversation intent classification (default)"""
-    question = "Hello, how are you doing today?"
-    intent, confidence = classify_intent(question)
-
-    assert intent == "conversation"
-    # Confidence should be moderate for general conversation
+def test_classify_intent_fallback():
+    """Test intent classification fallback for unrecognized queries"""
+    question = "Some random question without specific keywords"
+    intent = classify_intent(question)
+    assert intent == "general"
 
 
-def test_classify_intent_empty_string():
-    """Test intent classification with empty string"""
-    intent, confidence = classify_intent("")
+def test_extract_keywords():
+    """Test keyword extraction from questions"""
+    question = "What is structural tension in the creative orientation framework?"
+    keywords = extract_keywords(question)
 
-    assert intent == "conversation"  # Default
-    assert confidence == 0.5
+    assert "structural" in keywords
+    assert "tension" in keywords
+    assert "creative" in keywords
+    assert "orientation" in keywords
+    assert "framework" in keywords
+    # Stop words should be filtered
+    assert "what" not in keywords
+    assert "the" not in keywords
 
 
-# Flow Match Score Tests
+# Performance Tracker Tests
 
-def test_calculate_flow_match_exact():
-    """Test flow match scoring with exact intent match"""
+def test_performance_tracker_record():
+    """Test performance tracking records execution"""
+    tracker = PerformanceTracker(max_history=5)
+
+    tracker.record("flowise", "creative-orientation", 1000.0, True)
+    tracker.record("flowise", "creative-orientation", 1200.0, True)
+    tracker.record("flowise", "creative-orientation", 2000.0, False)
+
+    score = tracker.get_score("flowise", "creative-orientation")
+
+    # Should have recorded data and calculated a score
+    assert 0.0 <= score <= 1.0
+    # Success rate is 2/3, should influence score positively
+    assert score > 0.4
+
+
+def test_performance_tracker_no_history():
+    """Test performance tracker with no history returns neutral score"""
+    tracker = PerformanceTracker()
+
+    score = tracker.get_score("flowise", "unknown-intent")
+
+    # No history should return 0.5 (neutral)
+    assert score == 0.5
+
+
+def test_performance_tracker_max_history():
+    """Test performance tracker respects max history limit"""
+    tracker = PerformanceTracker(max_history=3)
+
+    # Record 5 entries
+    for i in range(5):
+        tracker.record("backend", "intent", 1000.0, True)
+
+    # Should only keep last 3
+    history = tracker._history["backend:intent"]
+    assert len(history) == 3
+
+
+# Router Tests
+
+@pytest.mark.asyncio
+async def test_router_match_score_calculation():
+    """Test flow match score calculation"""
+    router = UniversalRouter()
+
     flows = [
         UniversalFlow(
-            id="test1",
-            name="Test Flow 1",
+            id="flow1",
+            name="Test Flow",
             description="Test",
             backend=BackendType.FLOWISE,
-            backend_specific_id="test1",
-            intent_keywords=["creative-orientation"],
+            backend_specific_id="f1",
+            intent_keywords=["creative-orientation", "goal", "vision"],
             capabilities=[],
-            input_types=["text"],
-            output_types=["text"])
-    ]
-
-    score = calculate_flow_match_score(flows, "creative-orientation", 0.9)
-    assert score == 1.0
-
-
-def test_calculate_flow_match_partial():
-    """Test flow match scoring with partial match"""
-    flows = [
-        UniversalFlow(
-            id="test1",
-            name="Test Flow 1",
-            description="Test",
-            backend=BackendType.FLOWISE,
-            backend_specific_id="test1",
-            intent_keywords=["conversation"],  # Different intent
-            capabilities=[],
-            input_types=["text"],
-            output_types=["text"]
+            input_types=[],
+            output_types=[]
         )
     ]
 
-    # Should find partial match based on keyword overlap
-    score = calculate_flow_match_score(flows, "creative-orientation", 0.9)
-    assert 0.0 <= score <= 1.0
+    score, matching, best = router._calculate_match_score(flows, "creative-orientation")
+
+    assert score > 0.5  # Should have positive match
+    assert len(matching) == 1
+    assert best.id == "flow1"
 
 
-def test_calculate_flow_match_no_flows():
-    """Test flow match scoring with no flows"""
-    score = calculate_flow_match_score([], "creative-orientation", 0.9)
+@pytest.mark.asyncio
+async def test_router_match_score_no_match():
+    """Test match score when no flows match intent"""
+    router = UniversalRouter()
+
+    flows = [
+        UniversalFlow(
+            id="flow1",
+            name="Test Flow",
+            description="Test",
+            backend=BackendType.FLOWISE,
+            backend_specific_id="f1",
+            intent_keywords=["other-intent"],
+            capabilities=[],
+            input_types=[],
+            output_types=[]
+        )
+    ]
+
+    score, matching, best = router._calculate_match_score(flows, "creative-orientation")
+
     assert score == 0.0
-
-
-# Capability Score Tests
-
-def test_get_capability_score_langflow_rag():
-    """Test capability scoring for Langflow with RAG intent"""
-    backend = MagicMock(spec=FlowBackend)
-    backend.backend_type = BackendType.LANGFLOW
-
-    score = get_capability_score(backend, "rag-retrieval")
-    assert score == 1.0  # Langflow is optimized for RAG
-
-
-def test_get_capability_score_flowise_conversation():
-    """Test capability scoring for Flowise with conversation intent"""
-    backend = MagicMock(spec=FlowBackend)
-    backend.backend_type = BackendType.FLOWISE
-
-    score = get_capability_score(backend, "conversation")
-    assert score == 1.0  # Flowise is optimized for conversation
-
-
-def test_get_capability_score_unknown_intent():
-    """Test capability scoring with unknown intent"""
-    backend = MagicMock(spec=FlowBackend)
-    backend.backend_type = BackendType.FLOWISE
-
-    score = get_capability_score(backend, "unknown-intent")
-    assert score == 0.5  # Default neutral score
-
-
-# UniversalQueryHandler Tests
-
-@pytest.mark.asyncio
-async def test_handler_initialization(mock_backend_registry):
-    """Test handler initialization"""
-    handler = UniversalQueryHandler(mock_backend_registry)
-
-    assert handler.registry == mock_backend_registry
-    assert handler.enable_fallback is True
-    assert handler.default_timeout == 30.0
+    assert len(matching) == 0
+    assert best is None
 
 
 @pytest.mark.asyncio
-async def test_execute_query_with_auto_routing(
-    mock_backend_registry,
-    mock_flowise_backend
-):
-    """Test query execution with automatic backend routing"""
-    mock_backend_registry.backends = {
-        BackendType.FLOWISE: mock_flowise_backend
-    }
+async def test_router_select_backend_intelligent(mock_flowise_backend, mock_langflow_backend):
+    """Test intelligent backend selection"""
+    router = UniversalRouter()
 
-    handler = UniversalQueryHandler(mock_backend_registry)
+    backends = [mock_flowise_backend, mock_langflow_backend]
+    question = "What is structural tension?"
 
-    result = await handler.execute_query(
-        question="Help me with my creative vision",
-        backend_override="auto"
+    decision = await router.select_backend(backends, question, intent="creative-orientation")
+
+    # Should select Flowise (has creative-orientation flow)
+    assert decision.backend.backend_type == BackendType.FLOWISE
+    assert decision.method == "intelligent"
+    assert decision.score > 0.0
+    assert decision.intent == "creative-orientation"
+
+
+@pytest.mark.asyncio
+async def test_router_select_backend_explicit(mock_flowise_backend, mock_langflow_backend):
+    """Test explicit backend selection"""
+    router = UniversalRouter()
+
+    backends = [mock_flowise_backend, mock_langflow_backend]
+    question = "Find documents"
+
+    decision = await router.select_backend(
+        backends,
+        question,
+        intent="document-qa",
+        backend_override="langflow"
     )
 
-    assert "result" in result or "_mcp_metadata" in result
-    assert mock_flowise_backend.execute_flow.called
+    # Should select Langflow explicitly
+    assert decision.backend.backend_type == BackendType.LANGFLOW
+    assert decision.method == "explicit"
+    assert decision.score == 1.0
 
 
 @pytest.mark.asyncio
-async def test_execute_query_with_explicit_backend(
-    mock_backend_registry,
-    mock_flowise_backend
-):
-    """Test query execution with explicit backend selection"""
-    mock_backend_registry.backends = {
-        BackendType.FLOWISE: mock_flowise_backend
-    }
+async def test_router_select_backend_no_backends():
+    """Test router handles no available backends"""
+    router = UniversalRouter()
 
-    handler = UniversalQueryHandler(mock_backend_registry)
+    with pytest.raises(ValueError, match="No backends available"):
+        await router.select_backend([], "test question")
 
-    result = await handler.execute_query(
-        question="Test question",
-        backend_override="flowise"
+
+@pytest.mark.asyncio
+async def test_router_select_backend_no_matching_flows(mock_flowise_backend):
+    """Test router handles no matching flows for intent"""
+    router = UniversalRouter()
+
+    # Mock backend with no matching flows
+    mock_flowise_backend.discover_flows = AsyncMock(return_value=[
+        UniversalFlow(
+            id="flow1",
+            name="Other Flow",
+            description="Test",
+            backend=BackendType.FLOWISE,
+            backend_specific_id="f1",
+            intent_keywords=["other-intent"],
+            capabilities=[],
+            input_types=[],
+            output_types=[]
+        )
+    ])
+
+    with pytest.raises(ValueError, match="No backends have flows matching intent"):
+        await router.select_backend([mock_flowise_backend], "test", intent="creative-orientation")
+
+
+@pytest.mark.asyncio
+async def test_router_health_check_influences_selection(mock_flowise_backend, mock_langflow_backend):
+    """Test that backend health affects selection"""
+    router = UniversalRouter()
+
+    # Make Flowise unhealthy
+    mock_flowise_backend.health_check = AsyncMock(return_value=False)
+
+    # Both have creative-orientation, but only Langflow is healthy
+    mock_langflow_backend.discover_flows = AsyncMock(return_value=[
+        UniversalFlow(
+            id="langflow_flow",
+            name="Creative Flow",
+            description="Test",
+            backend=BackendType.LANGFLOW,
+            backend_specific_id="f1",
+            intent_keywords=["creative-orientation"],
+            capabilities=[],
+            input_types=[],
+            output_types=[]
+        )
+    ])
+
+    backends = [mock_flowise_backend, mock_langflow_backend]
+    decision = await router.select_backend(backends, "creative question", intent="creative-orientation")
+
+    # Should select healthy Langflow over unhealthy Flowise
+    assert decision.backend.backend_type == BackendType.LANGFLOW
+
+
+# Universal Query Handler Tests
+
+@pytest.mark.asyncio
+async def test_handle_universal_query_success(mock_flowise_backend):
+    """Test successful universal query execution"""
+    with patch('agentic_flywheel.tools.universal_query.BackendRegistry') as mock_registry_class:
+        # Setup mock registry
+        mock_registry = Mock()
+        mock_registry.discover_backends = AsyncMock()
+        mock_registry.get_all_backends = Mock(return_value=[mock_flowise_backend])
+        mock_registry_class.return_value = mock_registry
+
+        arguments = {
+            "question": "What is structural tension?",
+            "backend": "auto",
+            "include_routing_metadata": True
+        }
+
+        result = await handle_universal_query("universal_query", arguments)
+
+        assert len(result) == 1
+        response_text = result[0]["text"] if isinstance(result[0], dict) else result[0].text
+        assert "Structural tension" in response_text
+        assert "Routing Info" in response_text  # Metadata included
+
+
+@pytest.mark.asyncio
+async def test_handle_universal_query_missing_question():
+    """Test universal query with missing question parameter"""
+    result = await handle_universal_query("universal_query", {})
+
+    assert len(result) == 1
+    response_text = result[0]["text"] if isinstance(result[0], dict) else result[0].text
+    assert "Error" in response_text
+    assert "question" in response_text
+
+
+@pytest.mark.asyncio
+async def test_handle_universal_query_no_healthy_backends(mock_flowise_backend):
+    """Test universal query when no backends are healthy"""
+    # Make backend unhealthy
+    mock_flowise_backend.health_check = AsyncMock(return_value=False)
+
+    with patch('agentic_flywheel.tools.universal_query.BackendRegistry') as mock_registry_class:
+        mock_registry = Mock()
+        mock_registry.discover_backends = AsyncMock()
+        mock_registry.get_all_backends = Mock(return_value=[mock_flowise_backend])
+        mock_registry_class.return_value = mock_registry
+
+        arguments = {"question": "Test question"}
+
+        result = await handle_universal_query("universal_query", arguments)
+
+        assert len(result) == 1
+        response_text = result[0]["text"] if isinstance(result[0], dict) else result[0].text
+        assert "No healthy backends" in response_text
+
+
+@pytest.mark.asyncio
+async def test_handle_universal_query_with_fallback(mock_flowise_backend, mock_langflow_backend):
+    """Test universal query fallback when primary backend fails"""
+    # Make Flowise fail on execution
+    mock_flowise_backend.execute_flow = AsyncMock(side_effect=Exception("Flowise error"))
+
+    # Langflow should work
+    mock_langflow_backend.discover_flows = AsyncMock(return_value=[
+        UniversalFlow(
+            id="langflow_creative",
+            name="Creative Flow",
+            description="Fallback flow",
+            backend=BackendType.LANGFLOW,
+            backend_specific_id="f1",
+            intent_keywords=["creative-orientation"],
+            capabilities=[],
+            input_types=[],
+            output_types=[]
+        )
+    ])
+
+    with patch('agentic_flywheel.tools.universal_query.BackendRegistry') as mock_registry_class:
+        mock_registry = Mock()
+        mock_registry.discover_backends = AsyncMock()
+        mock_registry.get_all_backends = Mock(return_value=[mock_flowise_backend, mock_langflow_backend])
+        mock_registry_class.return_value = mock_registry
+
+        arguments = {
+            "question": "What is structural tension?",
+            "backend": "auto"
+        }
+
+        result = await handle_universal_query("universal_query", arguments)
+
+        assert len(result) == 1
+        response_text = result[0]["text"] if isinstance(result[0], dict) else result[0].text
+
+        # Should show fallback was used
+        assert "Fallback" in response_text or "langflow" in response_text.lower()
+
+
+# Response Formatting Tests
+
+def test_format_universal_response_with_metadata():
+    """Test response formatting with metadata"""
+    mock_decision = Mock()
+    mock_decision.method = "intelligent"
+    mock_decision.score = 0.92
+    mock_decision.intent = "creative-orientation"
+    mock_decision.all_scores = []
+
+    result = {"result": "Test response"}
+
+    formatted = format_universal_response(
+        result=result,
+        backend="flowise",
+        flow_name="Creative Orientation",
+        routing_decision=mock_decision,
+        duration_ms=1234.5,
+        include_metadata=True
     )
 
-    assert mock_flowise_backend.execute_flow.called
+    assert "Test response" in formatted
+    assert "Backend: flowise" in formatted
+    assert "Flow: Creative Orientation" in formatted
+    assert "Intelligent" in formatted
+    assert "0.92" in formatted
+    assert "1235ms" in formatted
 
 
-@pytest.mark.asyncio
-async def test_execute_query_with_intent_override(
-    mock_backend_registry,
-    mock_flowise_backend
-):
-    """Test query execution with explicit intent"""
-    mock_backend_registry.backends = {
-        BackendType.FLOWISE: mock_flowise_backend
-    }
+def test_format_universal_response_without_metadata():
+    """Test response formatting without metadata"""
+    mock_decision = Mock()
+    mock_decision.method = "intelligent"
 
-    handler = UniversalQueryHandler(mock_backend_registry)
+    result = {"result": "Test response"}
 
-    result = await handler.execute_query(
-        question="Random question",
-        intent_override="creative-orientation"
+    formatted = format_universal_response(
+        result=result,
+        backend="flowise",
+        flow_name="Creative Orientation",
+        routing_decision=mock_decision,
+        duration_ms=1234.5,
+        include_metadata=False
     )
 
-    # Should use creative intent regardless of question content
-    assert mock_flowise_backend.execute_flow.called
+    # Should only contain the response, no metadata
+    assert formatted == "Test response"
 
 
-@pytest.mark.asyncio
-async def test_execute_query_with_session_id(
-    mock_backend_registry,
-    mock_flowise_backend
-):
-    """Test query execution with session ID"""
-    mock_backend_registry.backends = {
-        BackendType.FLOWISE: mock_flowise_backend
-    }
+def test_format_universal_response_fallback():
+    """Test response formatting for fallback execution"""
+    mock_decision = Mock()
+    mock_decision.method = "intelligent"
+    mock_decision.score = 0.85
+    mock_decision.intent = "creative-orientation"
+    mock_decision.all_scores = []
 
-    handler = UniversalQueryHandler(mock_backend_registry)
+    result = {"result": "Fallback response"}
 
-    result = await handler.execute_query(
-        question="Test question",
-        session_id="test_session_123"
+    formatted = format_universal_response(
+        result=result,
+        backend="langflow",
+        flow_name="Creative Flow",
+        routing_decision=mock_decision,
+        duration_ms=2000.0,
+        include_metadata=True,
+        is_fallback=True,
+        primary_backend="flowise",
+        primary_error="Connection timeout"
     )
 
-    # Verify session_id was passed to backend
-    mock_flowise_backend.execute_flow.assert_called_once()
-    call_kwargs = mock_flowise_backend.execute_flow.call_args.kwargs
-    assert call_kwargs.get('session_id') == "test_session_123"
+    assert "Fallback response" in formatted
+    assert "Fallback: flowise → langflow" in formatted
+    assert "Primary Error: Connection timeout" in formatted
 
 
-@pytest.mark.asyncio
-async def test_execute_query_with_parameters(
-    mock_backend_registry,
-    mock_flowise_backend
-):
-    """Test query execution with custom parameters"""
-    mock_backend_registry.backends = {
-        BackendType.FLOWISE: mock_flowise_backend
-    }
-
-    handler = UniversalQueryHandler(mock_backend_registry)
-
-    params = {"temperature": 0.7, "max_tokens": 1000}
-    result = await handler.execute_query(
-        question="Test question",
-        parameters=params
-    )
-
-    # Verify parameters were passed to backend
-    call_kwargs = mock_flowise_backend.execute_flow.call_args.kwargs
-    assert call_kwargs.get('parameters') == params
-
-
-@pytest.mark.asyncio
-async def test_backend_selection_multi_backend(
-    mock_backend_registry,
-    mock_flowise_backend,
-    mock_langflow_backend
-):
-    """Test backend selection with multiple backends"""
-    mock_backend_registry.backends = {
-        BackendType.FLOWISE: mock_flowise_backend,
-        BackendType.LANGFLOW: mock_langflow_backend
-    }
-
-    handler = UniversalQueryHandler(mock_backend_registry)
-
-    # RAG query should prefer Langflow
-    result = await handler.execute_query(
-        question="Search documents and retrieve information"
-    )
-
-    # Verify correct backend was selected
-    if '_mcp_metadata' in result:
-        # Langflow should be selected for RAG queries
-        assert result['_mcp_metadata']['backend_used'] in ['langflow', 'flowise']
-
-
-@pytest.mark.asyncio
-async def test_fallback_on_primary_failure(
-    mock_backend_registry,
-    mock_flowise_backend,
-    mock_langflow_backend
-):
-    """Test fallback to secondary backend on primary failure"""
-    # Make Flowise fail
-    mock_flowise_backend.execute_flow = AsyncMock(
-        side_effect=Exception("Flowise unavailable")
-    )
-
-    mock_backend_registry.backends = {
-        BackendType.FLOWISE: mock_flowise_backend,
-        BackendType.LANGFLOW: mock_langflow_backend
-    }
-
-    handler = UniversalQueryHandler(mock_backend_registry, enable_fallback=True)
-
-    result = await handler.execute_query(question="Test question")
-
-    # Should have fallback metadata
-    if '_mcp_metadata' in result:
-        # Langflow should be used as fallback
-        assert result['_mcp_metadata'].get('fallback_used', False) or \
-               result['_mcp_metadata'].get('attempt', 1) > 1
-
-
-@pytest.mark.asyncio
-async def test_no_backends_available(mock_backend_registry):
-    """Test error handling when no backends available"""
-    mock_backend_registry.backends = {}
-
-    handler = UniversalQueryHandler(mock_backend_registry)
-
-    result = await handler.execute_query(question="Test question")
-
-    assert 'error' in result
-
-
-@pytest.mark.asyncio
-async def test_explicit_backend_not_found(mock_backend_registry):
-    """Test error handling when explicit backend not found"""
-    mock_backend_registry.backends = {}
-
-    handler = UniversalQueryHandler(mock_backend_registry)
-
-    result = await handler.execute_query(
-        question="Test question",
-        backend_override="nonexistent"
-    )
-
-    assert 'error' in result
-
-
-@pytest.mark.asyncio
-async def test_backend_disconnected(
-    mock_backend_registry,
-    mock_flowise_backend
-):
-    """Test handling of disconnected backend"""
-    mock_flowise_backend.is_connected = False
-
-    mock_backend_registry.backends = {
-        BackendType.FLOWISE: mock_flowise_backend
-    }
-
-    handler = UniversalQueryHandler(mock_backend_registry)
-
-    result = await handler.execute_query(question="Test question")
-
-    assert 'error' in result
-
-
-@pytest.mark.asyncio
-async def test_metadata_enrichment(
-    mock_backend_registry,
-    mock_flowise_backend
-):
-    """Test that response includes rich metadata"""
-    mock_backend_registry.backends = {
-        BackendType.FLOWISE: mock_flowise_backend
-    }
-
-    handler = UniversalQueryHandler(mock_backend_registry)
-
-    result = await handler.execute_query(question="Creative vision question")
-
-    if '_mcp_metadata' in result:
-        metadata = result['_mcp_metadata']
-
-        # Verify required metadata fields
-        assert 'backend_used' in metadata
-        assert 'flow_id' in metadata
-        assert 'flow_name' in metadata
-        assert 'routing_score' in metadata
-        assert 'intent_classified' in metadata
-        assert 'intent_confidence' in metadata
-        assert 'execution_time_ms' in metadata
-        assert 'fallback_used' in metadata
-        assert 'attempt' in metadata
-
-
-@pytest.mark.asyncio
-async def test_performance_cache_update(
-    mock_backend_registry,
-    mock_flowise_backend
-):
-    """Test that performance cache is updated after execution"""
-    mock_backend_registry.backends = {
-        BackendType.FLOWISE: mock_flowise_backend
-    }
-
-    handler = UniversalQueryHandler(mock_backend_registry)
-
-    # Execute query
-    await handler.execute_query(question="Test question")
-
-    # Verify performance cache was updated
-    assert BackendType.FLOWISE in handler._performance_cache
-    cache = handler._performance_cache[BackendType.FLOWISE]
-    assert cache['total'] > 0
-    assert 'success_rate' in cache
-
-
-@pytest.mark.asyncio
-async def test_timeout_parameter(
-    mock_backend_registry,
-    mock_flowise_backend
-):
-    """Test custom timeout parameter"""
-    mock_backend_registry.backends = {
-        BackendType.FLOWISE: mock_flowise_backend
-    }
-
-    handler = UniversalQueryHandler(mock_backend_registry)
-
-    result = await handler.execute_query(
-        question="Test question",
-        timeout=60.0
-    )
-
-    # Verify execution completed (timeout was respected)
-    assert 'error' not in result or '_mcp_metadata' in result
-
-
-@pytest.mark.asyncio
-async def test_routing_score_calculation(
-    mock_backend_registry,
-    mock_flowise_backend,
-    mock_langflow_backend
-):
-    """Test that routing scores are calculated correctly"""
-    mock_backend_registry.backends = {
-        BackendType.FLOWISE: mock_flowise_backend,
-        BackendType.LANGFLOW: mock_langflow_backend
-    }
-
-    handler = UniversalQueryHandler(mock_backend_registry)
-
-    result = await handler.execute_query(
-        question="Help with creative vision and structural tension"
-    )
-
-    if '_mcp_metadata' in result:
-        metadata = result['_mcp_metadata']
-
-        # Verify routing score exists and is valid
-        assert 'routing_score' in metadata
-        assert 0.0 <= metadata['routing_score'] <= 1.0
-
-        # Verify breakdown exists
-        if 'routing_breakdown' in metadata:
-            breakdown = metadata['routing_breakdown']
-            # Check that scores are in valid range
-            for score_name, score_value in breakdown.items():
-                assert 0.0 <= score_value <= 1.0
-
-
-@pytest.mark.asyncio
-async def test_all_backends_fail_with_fallback_disabled(
-    mock_backend_registry,
-    mock_flowise_backend
-):
-    """Test behavior when all backends fail and fallback is disabled"""
-    mock_flowise_backend.execute_flow = AsyncMock(
-        side_effect=Exception("Backend failure")
-    )
-
-    mock_backend_registry.backends = {
-        BackendType.FLOWISE: mock_flowise_backend
-    }
-
-    handler = UniversalQueryHandler(mock_backend_registry, enable_fallback=False)
-
-    result = await handler.execute_query(question="Test question")
-
-    assert 'error' in result
-    assert result.get('fallback_used', False) is False
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

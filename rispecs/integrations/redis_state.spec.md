@@ -1,450 +1,147 @@
 # RISE Specification: Redis State Persistence
 
-**Component**: Redis State Persistence
-**Version**: 1.0.0
-**Status**: Implementation Ready
+**Component**: Redis Session State Manager
+**Version**: 1.0
 **Created**: 2025-11-18
+**Parent Spec**: `rispecs/app.spec.md`
 **Session**: `a66f8bd2-29f5-461d-ad65-36b65252d469`
 
 ---
 
-## 1. Desired Outcome Definition
+## 🎨 Desired Outcome Definition
 
-**What Users Want to Create:**
+Users want to create **continuous conversational experiences** that transcend individual sessions, enabling long-running creative processes that span days, weeks, or even months.
 
-Users want **persistent conversational memory** that transcends session boundaries:
+### **Cross-Session Continuity**
+- Resume conversations from yesterday or last week seamlessly
+- Maintain full context across Claude restarts
+- Reference previous interactions in ongoing dialogues
+- Build upon past work without re-explaining context
 
-1. **Resume Conversations**: "Continue where we left off yesterday"
-2. **Long-Running Projects**: Work on creative projects over days/weeks
-3. **Context Retention**: System remembers previous topics, decisions, patterns
-4. **Cross-Restart Continuity**: Survive MCP server restarts without losing state
+### **Persistent Memory**
+- Chatflow execution history preserved
+- Session context and state maintained
+- Execution results retrievable after session ends
+- Multi-turn dialogues spanning multiple sessions
 
-**Creative Outcome**: Users experience continuous, coherent AI collaboration that feels like working with a long-term creative partner who never forgets.
-
----
-
-## 2. Current Structural Reality
-
-**Existing State:**
-- Sessions are **transient** - exist only in memory
-- Server restart = **complete amnesia**
-- No cross-session learning or context
-- Users must re-explain context every session
-
-**Gap:**
-The system wants to maintain continuity but has no persistent storage mechanism.
+### **Fail-Safe Persistence**
+- Persistence never blocks or crashes MCP operations
+- Graceful fallback when Redis unavailable
+- Optional feature (works without Redis)
+- Transparent to users (happens automatically)
 
 ---
 
-## 3. Structural Tension
+## 📊 Current Structural Reality
 
-**From**: Ephemeral, amnesia-prone sessions
-**To**: Persistent, context-aware conversations
+Sessions are **ephemeral** - state exists only in memory and vanishes on restart.
 
-**Natural Progression**: The need for continuity creates structural tension that resolves through persistent state storage.
+### **What Exists**
+- ✅ Session management via `UniversalSession` dataclass
+- ✅ In-memory session storage
+- ✅ Context and history tracking during active session
+- ✅ Available Redis tools via `coaiapy-mcp` (coaia_tash, coaia_fetch)
+
+### **What's Missing**
+- ❌ No cross-session persistence
+- ❌ Context lost on MCP server restart
+- ❌ Cannot resume conversations from previous days
+- ❌ Execution history disappears
+- ❌ No long-term memory capability
 
 ---
 
-## 4. State Serialization Strategy
+## ⚡ Structural Tension
 
-### 4.1 What to Persist
+**Current**: Transient, in-memory sessions
+**Desired**: Persistent, cross-session continuity
 
-**UniversalSession State** (essential fields):
+This tension drives natural advancement toward Redis-backed state persistence.
+
+---
+
+## 🔑 Redis Key Design
+
+```
+agentic_flywheel:session:<session_id>              # Full session state
+agentic_flywheel:execution:<execution_id>          # Individual execution
+agentic_flywheel:history:<session_id>:<flow_id>    # Execution history
+```
+
+**TTL Strategy**: 7 days default, configurable per key type
+
+---
+
+## 💾 State Serialization
+
+**Format**: JSON (human-readable, debuggable, universal)
+
+**Session Data**:
 ```json
 {
   "id": "session_abc123",
   "backend": "flowise",
-  "backend_session_id": "flowise_session_xyz",
+  "backend_session_id": "flowise_xyz",
   "status": "active",
-  "current_flow_id": "creative_flow_001",
+  "current_flow_id": "csv2507",
   "context": {
     "topic": "structural tension",
-    "previous_insights": ["..."],
-    "user_preferences": {"temperature": 0.7}
+    "previous_queries": ["What is creative orientation?"]
   },
   "history": [
-    {"role": "user", "content": "...", "timestamp": "..."},
-    {"role": "assistant", "content": "...", "timestamp": "..."}
+    {
+      "timestamp": "2025-11-18T10:00:00Z",
+      "question": "What is creative orientation?",
+      "flow_id": "csv2507",
+      "response": "Creative orientation focuses on...",
+      "duration_ms": 1234
+    }
   ],
   "metadata": {
     "created_at": "2025-11-18T10:00:00Z",
-    "last_active": "2025-11-18T14:30:00Z",
-    "message_count": 15
+    "last_active": "2025-11-18T10:05:00Z"
   }
 }
 ```
 
-**Format Choice**: **JSON**
-- **Why**: Universal, human-readable, debuggable
-- **Trade-off**: Larger than MessagePack, but worth it for transparency
-- **Alternative considered**: MessagePack (smaller, faster, but opaque)
-
-### 4.2 What NOT to Persist
-
-- Backend-specific internal state
-- Temporary execution artifacts
-- Large binary data
-- Sensitive credentials (never persist)
-
 ---
 
-## 5. TTL Strategy
-
-### 5.1 Default TTLs
-
-- **Active Sessions**: 7 days (604800 seconds)
-- **Execution Results**: 1 day (86400 seconds)
-- **Execution History**: 7 days (604800 seconds)
-
-### 5.2 Rationale
-
-- **7 days**: Balances persistence with storage costs
-- **User-configurable**: Via environment variables
-- **Per-session override**: Future enhancement
-
-### 5.3 Expiration Behavior
-
-- **Automatic**: Redis TTL handles expiration
-- **Grace period**: No hard cutoff - gradual degradation
-- **Notification**: Log when sessions expire
-
----
-
-## 6. Redis Key Design
-
-### 6.1 Key Naming Convention
-
-**Pattern**:
-```
-agentic_flywheel:<component>:<identifier>[:<sub_identifier>]
-```
-
-**Specific Keys**:
-```
-agentic_flywheel:session:<session_id>
-agentic_flywheel:execution:<execution_id>
-agentic_flywheel:history:<session_id>:<flow_id>
-agentic_flywheel:meta:server_id
-```
-
-### 6.2 Key Collision Prevention
-
-**Multi-Instance Safety**:
-- Include server/instance ID in key prefix (optional)
-- Use UUIDs for session IDs
-- Namespace per deployment environment
-
-**Example**:
-```
-agentic_flywheel:prod:session:abc123
-agentic_flywheel:dev:session:abc123
-```
-
-### 6.3 Key Organization Benefits
-
-- **Scannable**: List all sessions with pattern matching
-- **Hierarchical**: Logical grouping
-- **Deletable**: Bulk operations by pattern
-- **Debuggable**: Clear key meanings
-
----
-
-## 7. Error Handling & Fail-Safe Design
-
-### 7.1 Failure Modes
-
-1. **Redis Unavailable**: Service down, network issue
-2. **Connection Timeout**: Slow network
-3. **Serialization Error**: Invalid data format
-4. **Key Not Found**: Session expired or never existed
-
-### 7.2 Graceful Degradation
-
-**Principle**: **Redis enhances but doesn't break functionality**
+## 🧪 Implementation Pattern
 
 ```python
-async def save_session(session):
-    if not self.enabled:
-        return False  # Silently skip
+from agentic_flywheel.integrations import RedisSessionManager
 
-    try:
-        await redis_save(session)
-        return True
-    except RedisError as e:
-        logger.warning(f"Redis save failed: {e}")
-        return False  # Don't crash - just log
+# Initialize
+redis_mgr = RedisSessionManager(enabled=True, ttl_seconds=604800)  # 7 days
 
-    # MCP tool continues working without persistence
-```
-
-### 7.3 Fallback Behavior
-
-- **Save failure**: Log warning, continue
-- **Load failure**: Return None, create new session
-- **List failure**: Return empty list
-- **Delete failure**: Log warning, continue
-
-**User Impact**: Minimal - session just won't persist across restarts
-
----
-
-## 8. Implementation Architecture
-
-### 8.1 Core Classes
-
-**RedisSessionManager**:
-- Save/load/delete/list sessions
-- Wraps coaia-mcp tools (`coaia_tash`, `coaia_fetch`, etc.)
-- Handles serialization/deserialization
-- Manages TTL
-
-**RedisExecutionCache**:
-- Cache individual execution results
-- Store execution history per session/flow
-- Support result retrieval for analysis
-
-**RedisConfig**:
-- Load configuration from environment
-- Validate settings
-- Provide defaults
-
-### 8.2 Integration Points
-
-**With MCP Server**:
-```python
-# After flow execution
-await redis_session_manager.save_session(session)
-
-# At session start
-existing_session = await redis_session_manager.load_session(session_id)
-if existing_session:
-    # Resume conversation
-    session = existing_session
-else:
-    # New session
-    session = create_new_session()
-```
-
-**With Universal Query Tool**:
-- Automatically save session after each query
-- Load session context before execution
-- Enrich responses with historical context
-
----
-
-## 9. coaia-mcp Tool Integration
-
-### 9.1 Tool Mapping
-
-| Operation | coaia Tool | Purpose |
-|-----------|-----------|---------|
-| Save | `coaia_tash` | Store session state |
-| Load | `coaia_fetch` | Retrieve session state |
-| List | `coaia_list` | Find all sessions |
-| Delete | `coaia_drop` | Remove session |
-
-### 9.2 Tool Call Pattern
-
-```python
 # Save session
-async def _call_coaia_tash(key: str, data: dict, ttl: int):
-    """Wrapper for coaia_tash MCP tool"""
-    # In production: Use MCP client to call tool
-    # In tests: Mock this function
-    pass
+await redis_mgr.save_session(session)
 
-async def save_session(session):
-    key = f"agentic_flywheel:session:{session.id}"
-    data = serialize_session(session)
-    await self._call_coaia_tash(key, data, self.ttl_seconds)
-```
+# Load session (even after restart)
+session = await redis_mgr.load_session("session_abc123")
 
-### 9.3 Testing Strategy
-
-- **Mock coaia tools**: Don't require real Redis in tests
-- **Test serialization**: Verify JSON round-trip
-- **Test error handling**: Simulate failures
-- **Integration tests**: Optional real Redis tests
-
----
-
-## 10. Schema Evolution & Migration
-
-### 10.1 Versioning Strategy
-
-Include schema version in stored data:
-```json
-{
-  "_schema_version": "1.0",
-  "id": "session_abc",
-  ...
-}
-```
-
-### 10.2 Migration Path
-
-**V1 → V2 Transition**:
-1. New code reads both V1 and V2
-2. New saves write V2
-3. Gradual migration as sessions are accessed
-4. V1 expires naturally via TTL
-
-**No forced migration needed** - sessions expire automatically.
-
----
-
-## 11. Performance Characteristics
-
-### 11.1 Latency Targets
-
-- **Save operation**: <50ms
-- **Load operation**: <30ms
-- **List operation**: <100ms
-- **Delete operation**: <20ms
-
-### 11.2 Optimization Strategies
-
-- **Lazy loading**: Load only when needed
-- **Batch operations**: Save multiple updates together
-- **Compression**: Optional gzip for large sessions
-- **Caching**: In-memory cache with Redis fallback
-
----
-
-## 12. Monitoring & Observability
-
-### 12.1 Metrics to Track
-
-- Save success/failure rate
-- Load hit/miss rate
-- Average session size
-- TTL expiration events
-- Operation latencies
-
-### 12.2 Logging Strategy
-
-```python
-logger.info("Session saved", extra={
-    "session_id": session.id,
-    "size_bytes": len(serialized),
-    "ttl_seconds": ttl
-})
-
-logger.warning("Session load failed", extra={
-    "session_id": session_id,
-    "error": str(e)
-})
+# If Redis fails, falls back gracefully
 ```
 
 ---
 
-## 13. Security Considerations
+## ✅ Integration Contract
 
-### 13.1 Data Protection
-
-- **No credentials**: Never store API keys or passwords
-- **Sanitization**: Remove sensitive data before save
-- **Encryption**: Optional field-level encryption
-- **Access control**: Redis AUTH if available
-
-### 13.2 Privacy
-
-- **TTL enforcement**: Auto-delete old sessions
-- **Manual deletion**: Support user-initiated deletion
-- **Audit trail**: Log access to sensitive sessions
+1. **Optional**: Works without Redis configured
+2. **Fail-safe**: Redis errors don't crash MCP
+3. **Async**: All operations async
+4. **TTL-managed**: Auto-expiration
+5. **JSON serialized**: Standard format
+6. **Organized keys**: Clear namespace
 
 ---
 
-## 14. Configuration
+## 🎯 Success Metrics
 
-### 14.1 Environment Variables
+- Session save/load roundtrip < 50ms
+- Cross-restart continuity works
+- Graceful Redis unavailability handling
+- Auto-expiration via TTL
+- Clean key organization
 
-```bash
-# Redis state persistence
-REDIS_STATE_ENABLED=true                    # Enable/disable persistence
-REDIS_SESSION_TTL_SECONDS=604800            # 7 days
-REDIS_EXECUTION_TTL_SECONDS=86400           # 1 day
-REDIS_KEY_PREFIX=agentic_flywheel           # Custom prefix
-REDIS_HOST=localhost                        # Redis host
-REDIS_PORT=6379                             # Redis port
-```
-
-### 14.2 Runtime Configuration
-
-```python
-config = RedisConfig.from_env()
-session_mgr = RedisSessionManager(
-    enabled=config['enabled'],
-    ttl_seconds=config['session_ttl'],
-    key_prefix=config['key_prefix']
-)
-```
-
----
-
-## 15. Testing Strategy
-
-### 15.1 Unit Tests (>80% coverage)
-
-- Serialization/deserialization
-- TTL handling
-- Error scenarios
-- Key naming
-- Config loading
-
-### 15.2 Integration Tests
-
-- Real Redis instance (optional)
-- End-to-end save/load
-- Multi-session scenarios
-- Expiration testing
-
-### 15.3 Mock Strategy
-
-```python
-@pytest.fixture
-def mock_coaia_tools(mocker):
-    """Mock coaia-mcp tool calls"""
-    return {
-        'tash': mocker.patch('redis_state._call_coaia_tash'),
-        'fetch': mocker.patch('redis_state._call_coaia_fetch'),
-        'list': mocker.patch('redis_state._call_coaia_list'),
-        'drop': mocker.patch('redis_state._call_coaia_drop')
-    }
-```
-
----
-
-## 16. Success Criteria
-
-- ✅ **Persistence works**: Save/load round-trip successful
-- ✅ **Fail-safe**: Redis errors don't break MCP
-- ✅ **Performance**: Operations <50ms
-- ✅ **TTL enforcement**: Old sessions auto-expire
-- ✅ **Tests pass**: >80% coverage, all tests green
-- ✅ **Clear namespace**: Organized Redis keys
-- ✅ **User experience**: Seamless conversation continuity
-
----
-
-## 17. Implementation Checklist
-
-- [ ] Create `RedisSessionManager` class
-- [ ] Create `RedisExecutionCache` class
-- [ ] Create `RedisConfig` helper
-- [ ] Implement save_session
-- [ ] Implement load_session
-- [ ] Implement delete_session
-- [ ] Implement list_sessions
-- [ ] Add error handling
-- [ ] Write unit tests (>20 tests)
-- [ ] Update integrations __init__.py
-- [ ] Create result file
-
----
-
-**Status**: ✅ Implementation Ready
-**Design Decisions**: Documented and justified
-**Next Steps**: Implement classes and tests
-
-**Key Insight**: Persistence emerges naturally from the structural tension between ephemeral and continuous collaboration.
+**Specification Complete** ✅

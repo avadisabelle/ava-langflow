@@ -1,596 +1,735 @@
 # RISE Specification: Universal Query MCP Tool
 
 **Component**: Universal Query MCP Tool
-**Version**: 1.0.0
-**Status**: Implementation Ready
+**Version**: 1.0
 **Created**: 2025-11-18
+**Parent Spec**: `rispecs/app.spec.md`
 **Session**: `a66f8bd2-29f5-461d-ad65-36b65252d469`
+**Parent Trace**: `a50f3fc2-eb8c-434d-a37e-ef9615d9c07d`
 
 ---
 
-## 1. Desired Outcome Definition
+## 🎨 Desired Outcome Definition
 
-**What Users Want to Create:**
+Users who integrate the Agentic Flywheel MCP into their creative workflows want to create:
 
-Users want to interact with AI workflows **without platform concerns**. They want to:
+### **Platform-Agnostic AI Interaction**
+- **Ask Questions Naturally**: Users ask questions without needing to know which platform (Flowise or Langflow) handles them
+- **Automatic Optimization**: System automatically selects the best backend based on capabilities, health, and performance
+- **Seamless Experience**: Transitions between backends are invisible to users
+- **Single Interface**: One tool (`universal_query`) replaces multiple platform-specific tools
 
-1. **Ask Questions Naturally**: "Help me analyze this technical document" - without knowing whether Langflow or Flowise handles it better
-2. **Seamless Experience**: The system routes to the optimal backend transparently
-3. **Reliability**: If the primary backend fails, fallback to secondary backend automatically
-4. **Observability**: Understand which backend handled their query and why
-5. **Session Continuity**: Maintain conversation context across multiple queries
+### **Intelligent Routing**
+- **Intent-Based Selection**: System understands question intent and routes to flows with matching capabilities
+- **Health-Aware**: Automatically avoids unhealthy backends
+- **Performance-Optimized**: Prefers faster, more reliable backends
+- **User-Overridable**: Advanced users can specify backend explicitly when needed
 
-**Creative Outcome**: Users experience a unified AI workflow platform that intelligently orchestrates multiple backends, making the underlying complexity invisible while delivering optimal results.
-
----
-
-## 2. Current Structural Reality
-
-### Existing State
-
-**Platform-Specific Tools** (`mcp_server.py`):
-- `flowise_query` - Hardcoded to Flowise backend only
-- Manual backend selection required
-- No cross-platform routing
-- No fallback mechanisms
-
-**Backend Infrastructure** (available):
-- `BackendRegistry` - Manages multiple backends
-- `FlowBackend` interface - Universal abstraction
-- `LangflowBackend` - New backend implementation
-- `FlowiseBackend` - Existing backend (via manager)
-
-**Gaps**:
-- No intelligent routing algorithm
-- No intent-to-backend mapping
-- No performance-based selection
-- No unified query interface
+### **Rich Observability**
+- **Routing Transparency**: Users can see which backend was selected and why
+- **Decision Metrics**: Scores for each backend decision factor visible in response metadata
+- **Fallback Tracking**: When primary backend fails, users see fallback chain
+- **Performance Insights**: Execution time, token usage, costs tracked per backend
 
 ---
 
-## 3. Structural Tension
+## 📊 Current Structural Reality
 
-**From**: Fragmented platform-specific queries
-**To**: Unified intelligent query routing
+The Agentic Flywheel currently has **fragmented querying**:
 
-**Tension Points**:
-1. **Manual → Automatic**: Users manually choose backends → System auto-selects optimal backend
-2. **Single → Multi**: One backend per query → Multiple backends with fallback
-3. **Opaque → Transparent**: Hidden routing logic → Observable decision-making
-4. **Stateless → Stateful**: No session context → Cross-session continuity
+### **What Exists**
+- ✅ `flowise_query` tool - Queries Flowise backend only
+- ✅ Intent classification logic in `flowise_manager.py`
+- ✅ `BackendRegistry` for multi-backend management
+- ✅ `LangflowBackend` adapter (Task 1 complete)
+- ✅ `FlowiseBackend` adapter (existing)
+- ✅ Universal `FlowBackend` interface
 
-**Natural Progression**: The system wants to resolve routing complexity into simple, natural queries.
+### **What's Missing**
+- ❌ **No unified query tool**: Users must choose `flowise_query` or hypothetical `langflow_query`
+- ❌ **No intelligent routing**: No automatic backend selection based on capabilities
+- ❌ **No fallback**: If Flowise is down, queries fail instead of routing to Langflow
+- ❌ **No performance optimization**: No backend selection based on historical performance
+- ❌ **No cross-backend comparison**: Can't evaluate which backend is better for specific intents
+
+### **The Gap**
+Between "manual platform selection" and "intelligent platform-agnostic querying" — users must know backend internals instead of just asking questions.
 
 ---
 
-## 4. Routing Algorithm
+## ⚡ Structural Tension
 
-### 4.1 Intent Classification
+**Current Reality**: Fragmented, platform-specific AI querying
+**Desired Outcome**: Unified, intelligent, platform-agnostic querying
 
-**Input**: User question (string)
-**Output**: Intent category + confidence score
+This tension creates natural advancement toward universal query tool:
+1. **Users want simplicity** → System provides single interface
+2. **Users want reliability** → System routes to healthy backends
+3. **Users want performance** → System selects optimal backends
+4. **Users want visibility** → System exposes routing decisions
 
-**Categories**:
-- `creative-orientation` - Creative/vision work (Robert Fritz patterns)
-- `technical-analysis` - Code analysis, debugging, technical deep-dives
-- `structural-thinking` - System design, architecture, patterns
-- `conversation` - General chat, Q&A
-- `rag-retrieval` - Document retrieval, knowledge base queries
-- `data-processing` - ETL, transformation, analysis
+---
 
-**Implementation Pattern**:
+## 🌱 Natural Progression Patterns
+
+### **Pattern 1: Transparent Routing**
 ```python
-def classify_intent(question: str) -> Tuple[str, float]:
-    """
-    Classify user intent from question text
+# User doesn't specify backend
+result = await universal_query("What is structural tension?")
 
-    Returns:
-        (intent_category, confidence_score)
-    """
-    # Keyword-based classification (can be enhanced with ML)
-    keywords = question.lower()
-
-    if any(word in keywords for word in ['creative', 'vision', 'goal', 'tension']):
-        return ('creative-orientation', 0.9)
-    elif any(word in keywords for word in ['code', 'debug', 'error', 'function']):
-        return ('technical-analysis', 0.85)
-    elif any(word in keywords for word in ['architecture', 'design', 'pattern', 'system']):
-        return ('structural-thinking', 0.8)
-    elif any(word in keywords for word in ['document', 'find', 'search', 'retrieve']):
-        return ('rag-retrieval', 0.85)
-    else:
-        return ('conversation', 0.5)
+# System internally:
+# 1. Classifies intent → "creative-orientation"
+# 2. Finds flows across all backends
+# 3. Scores backends: Flowise (0.92), Langflow (0.75)
+# 4. Routes to Flowise
+# 5. Returns result + routing metadata
 ```
 
-### 4.2 Backend Scoring Algorithm
+### **Pattern 2: Graceful Fallback**
+```python
+# Primary backend fails
+backends = [flowise_backend, langflow_backend]
 
-**Inputs**:
-- User intent + confidence
-- Available backends
-- Backend health status
-- Historical performance metrics
-
-**Scoring Formula**:
+try:
+    result = await route_to_backend(flowise_backend, query)
+except BackendError:
+    # Automatic fallback to secondary
+    result = await route_to_backend(langflow_backend, query)
+    result["_routing"]["fallback"] = True
 ```
-Backend Score = (
-    flow_match_score * 0.4 +      # Does backend have matching flows?
-    health_score * 0.3 +            # Is backend healthy/responsive?
-    performance_score * 0.2 +       # Historical performance
-    capability_score * 0.1          # Backend-specific capabilities
+
+### **Pattern 3: Explicit Override**
+```python
+# Advanced user specifies backend
+result = await universal_query(
+    question="Analyze this code",
+    backend="langflow"  # Explicit selection
 )
+# System skips routing, uses Langflow directly
 ```
 
-**Component Scores**:
-
-1. **Flow Match Score** (0.0 - 1.0):
-   - 1.0: Backend has flows with exact intent match
-   - 0.7: Backend has flows with partial intent match
-   - 0.3: Backend has general-purpose flows
-   - 0.0: Backend has no matching flows
-
-2. **Health Score** (0.0 - 1.0):
-   - 1.0: Backend connected and healthy
-   - 0.5: Backend connected but slow to respond
-   - 0.0: Backend disconnected or unhealthy
-
-3. **Performance Score** (0.0 - 1.0):
-   - Based on historical latency, success rate, quality scores
-   - Cached from previous executions
-   - Decays over time (recent performance weighted higher)
-
-4. **Capability Score** (0.0 - 1.0):
-   - Langflow: 1.0 for RAG, 0.7 for conversation
-   - Flowise: 1.0 for conversation, 0.7 for RAG
-   - Custom backends: Configurable
-
-### 4.3 Selection Logic
-
+### **Pattern 4: Performance Learning**
 ```python
-async def select_backend(
-    question: str,
-    backends: List[FlowBackend],
-    user_preference: Optional[BackendType] = None
-) -> Tuple[FlowBackend, UniversalFlow, float]:
-    """
-    Select optimal backend and flow for query execution
+# System tracks backend performance
+performance_tracker.record({
+    "backend": "flowise",
+    "intent": "creative-orientation",
+    "latency_ms": 1250,
+    "success": True
+})
 
-    Returns:
-        (selected_backend, selected_flow, routing_score)
-    """
-    # User override takes precedence
-    if user_preference:
-        backend = get_backend(user_preference)
-        if backend and backend.is_connected:
-            flows = await backend.discover_flows()
-            flow = select_best_flow(flows, question)
-            return (backend, flow, 1.0)
-
-    # Classify intent
-    intent, confidence = classify_intent(question)
-
-    # Score all backends
-    scores = {}
-    for backend in backends:
-        if not backend.is_connected:
-            continue
-
-        # Get flows matching intent
-        flows = await backend.discover_flows()
-        matching_flows = [f for f in flows if intent in f.intent_keywords]
-
-        # Calculate component scores
-        flow_match = calculate_flow_match_score(matching_flows, intent, confidence)
-        health = 1.0 if await backend.health_check() else 0.0
-        performance = get_cached_performance(backend)
-        capability = get_capability_score(backend, intent)
-
-        # Combined score
-        total_score = (
-            flow_match * 0.4 +
-            health * 0.3 +
-            performance * 0.2 +
-            capability * 0.1
-        )
-
-        scores[backend] = {
-            'score': total_score,
-            'flows': matching_flows,
-            'breakdown': {
-                'flow_match': flow_match,
-                'health': health,
-                'performance': performance,
-                'capability': capability
-            }
-        }
-
-    # Select highest scoring backend
-    if not scores:
-        raise NoBackendsAvailable("No healthy backends available")
-
-    best_backend = max(scores.items(), key=lambda x: x[1]['score'])
-    backend, info = best_backend
-
-    # Select best flow from backend
-    flow = select_best_flow(info['flows'], question)
-
-    return (backend, flow, info['score'])
+# Future queries use historical data
+# "creative-orientation" queries → prefer flowise (faster historically)
 ```
 
 ---
 
-## 5. Fallback Strategy
+## 🧭 Routing Algorithm
 
-### 5.1 Primary Execution Failure
+### **Multi-Factor Scoring**
 
-**Trigger**: Primary backend execution fails or times out
+Each backend receives a composite score based on:
 
-**Fallback Cascade**:
-1. **Retry Once**: Attempt same backend again (transient errors)
-2. **Secondary Backend**: Try next highest-scoring backend
-3. **Any Healthy Backend**: Try any available healthy backend
-4. **Graceful Failure**: Return informative error to user
+#### **1. Flow Match Score** (50% weight)
+```python
+def calculate_match_score(flows: List[UniversalFlow], intent: str) -> float:
+    """
+    Score how well backend's flows match the query intent
 
-**Implementation**:
+    Returns: 0.0 (no match) to 1.0 (perfect match)
+    """
+    if not flows:
+        return 0.0
+
+    # Find flows with matching intent keywords
+    matching_flows = [f for f in flows if intent in f.intent_keywords]
+
+    if not matching_flows:
+        return 0.0
+
+    # Best flow determines score
+    best_flow = max(matching_flows, key=lambda f: len(f.intent_keywords))
+
+    # Score based on keyword specificity
+    # More keywords = more specific = higher score
+    specificity = min(len(best_flow.intent_keywords) / 10, 1.0)
+
+    return 0.5 + (specificity * 0.5)  # Range: 0.5 to 1.0 for matches
+```
+
+#### **2. Health Score** (30% weight)
+```python
+async def calculate_health_score(backend: FlowBackend) -> float:
+    """
+    Score backend health and availability
+
+    Returns: 0.0 (unhealthy) to 1.0 (healthy)
+    """
+    is_healthy = await backend.health_check()
+    return 1.0 if is_healthy else 0.0
+```
+
+#### **3. Performance Score** (20% weight)
+```python
+def calculate_performance_score(
+    backend: FlowBackend,
+    intent: str,
+    performance_history: Dict
+) -> float:
+    """
+    Score based on historical performance for this intent
+
+    Returns: 0.0 (poor performance) to 1.0 (excellent performance)
+    """
+    backend_id = backend.backend_type.value
+
+    # Get historical performance for this backend + intent
+    history = performance_history.get(f"{backend_id}:{intent}", [])
+
+    if not history:
+        return 0.5  # Neutral score if no history
+
+    # Recent performance matters more (last 10 executions)
+    recent = history[-10:]
+
+    # Calculate success rate
+    success_rate = sum(1 for r in recent if r["success"]) / len(recent)
+
+    # Calculate average latency (normalized)
+    avg_latency = sum(r["latency_ms"] for r in recent) / len(recent)
+    latency_score = 1.0 - min(avg_latency / 5000, 1.0)  # 5s = 0.0 score
+
+    # Combined performance score
+    return (success_rate * 0.7) + (latency_score * 0.3)
+```
+
+#### **4. Composite Score**
+```python
+async def score_backend(
+    backend: FlowBackend,
+    intent: str,
+    performance_history: Dict
+) -> float:
+    """
+    Calculate composite score for backend selection
+
+    Returns: 0.0 (worst) to 1.0 (best)
+    """
+    flows = await backend.discover_flows()
+
+    match_score = calculate_match_score(flows, intent) * 0.5
+    health_score = await calculate_health_score(backend) * 0.3
+    perf_score = calculate_performance_score(backend, intent, performance_history) * 0.2
+
+    return match_score + health_score + perf_score
+```
+
+---
+
+## 🛡️ Fallback Strategy
+
+### **Multi-Tier Fallback**
+
+1. **Primary Backend Failure** → Route to highest scoring alternate
+2. **All Backends Unhealthy** → Return cached response (if available)
+3. **No Matching Flows** → Use generic flow or return helpful error
+4. **Total System Failure** → Graceful error message with diagnostic info
+
 ```python
 async def execute_with_fallback(
-    question: str,
     backends: List[FlowBackend],
-    max_retries: int = 2
+    query: str,
+    intent: str
 ) -> Dict[str, Any]:
-    """Execute query with fallback strategy"""
+    """
+    Execute query with automatic fallback chain
+    """
+    # Sort backends by score (highest first)
+    scored_backends = await score_all_backends(backends, intent)
+    scored_backends.sort(key=lambda x: x[1], reverse=True)
 
-    # Get ranked backends
-    ranked = await rank_backends(question, backends)
+    last_error = None
 
-    for attempt, (backend, flow, score) in enumerate(ranked):
+    for backend, score in scored_backends:
+        if score == 0.0:
+            continue  # Skip backends with no matching flows
+
         try:
-            result = await backend.execute_flow(
-                flow_id=flow.backend_specific_id,
-                input_data={"question": question},
-                timeout=30.0
-            )
-
-            # Success - add metadata
-            result['_routing'] = {
-                'backend_used': backend.backend_type.value,
-                'flow_id': flow.id,
-                'routing_score': score,
-                'attempt': attempt + 1,
-                'fallback_used': attempt > 0
-            }
-
+            result = await backend.execute_flow(...) # Placeholder for actual execution
+            result["_routing"]["backend_used"] = backend.backend_type.value
+            result["_routing"]["score"] = score
+            result["_routing"]["fallback_used"] = False
             return result
 
         except Exception as e:
-            logger.warning(
-                f"Backend {backend.backend_type.value} failed (attempt {attempt + 1}): {e}"
-            )
+            last_error = e
+            logger.warning(f"Backend {backend.backend_type.value} failed: {e}")
+            continue
 
-            if attempt == len(ranked) - 1:
-                # All backends failed
-                return {
-                    'error': 'All backends failed',
-                    'attempts': attempt + 1,
-                    'last_error': str(e)
-                }
+    # All backends failed
+    raise AllBackendsFailedError(
+        f"All {len(backends)} backends failed. Last error: {last_error}"
+    )
+```
 
-            # Continue to next backend
+---
+
+## ⚡ Performance Optimization
+
+### **Caching Strategy**
+
+#### **Flow Discovery Cache**
+```python
+# Cache discovered flows for 60 seconds
+flow_cache = {
+    "flowise": {"timestamp": 1637012345, "flows": [...]},
+    "langflow": {"timestamp": 1637012345, "flows": [...]}
+}
+
+async def get_flows_cached(backend: FlowBackend) -> List[UniversalFlow]:
+    cache_key = backend.backend_type.value
+    cached = flow_cache.get(cache_key)
+
+    if cached and (time.time() - cached["timestamp"]) < 60:
+        return cached["flows"]
+
+    # Cache miss or expired
+    flows = await backend.discover_flows()
+    flow_cache[cache_key] = {"timestamp": time.time(), "flows": flows}
+    return flows
+```
+
+#### **Performance History Cache**
+```python
+# In-memory performance tracking (last 100 executions per backend:intent pair)
+performance_cache = defaultdict(lambda: deque(maxlen=100))
+
+def record_performance(backend: str, intent: str, latency_ms: float, success: bool):
+    key = f"{backend}:{intent}"
+    performance_cache[key].append({
+        "timestamp": time.time(),
+        "latency_ms": latency_ms,
+        "success": success
+    })
+```
+
+### **Parallel Backend Queries** (Future Enhancement)
+```python
+# Query all backends in parallel, use fastest response
+async def parallel_query(backends: List[FlowBackend], query: str):
+    tasks = [backend.execute_flow(...) for backend in backends] # Placeholder for actual execution
+
+    # Wait for first success
+    for task in asyncio.as_completed(tasks):
+        try:
+            result = await task
+            # Cancel remaining tasks
+            for t in tasks:
+                if not t.done():
+                    t.cancel()
+            return result
+        except:
             continue
 ```
 
-### 5.2 Timeout Handling
+---
 
-**Timeout Tiers**:
-- Backend health check: 5 seconds
-- Flow discovery: 10 seconds
-- Flow execution: 30 seconds (configurable)
-- Overall universal_query: 45 seconds
+## 🔧 MCP Tool Schema
 
-**Graceful Degradation**:
-- If discovery times out: Use cached flow list
-- If execution times out: Try faster backend
-- If all time out: Return partial results with timeout notice
+### **Tool Definition**
+
+```json
+{
+  "name": "universal_query",
+  "description": "Query AI workflows across all backends with intelligent routing. Automatically selects optimal backend (Flowise or Langflow) based on query intent, backend health, and performance. Supports session continuity and custom parameters.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "question": {
+        "type": "string",
+        "description": "Question or prompt to send to AI workflow. Can be multi-line for complex queries."
+      },
+      "intent": {
+        "type": "string",
+        "description": "Optional intent classification override. If not provided, system will classify automatically. Examples: 'creative-orientation', 'technical-analysis', 'document-qa'.",
+        "enum": ["creative-orientation", "technical-analysis", "document-qa", "code-review", "general"]
+      },
+      "backend": {
+        "type": "string",
+        "enum": ["auto", "flowise", "langflow"],
+        "description": "Backend selection strategy. 'auto' (default) uses intelligent routing. Specify 'flowise' or 'langflow' to force specific backend.",
+        "default": "auto"
+      },
+      "session_id": {
+        "type": "string",
+        "description": "Session ID for conversation continuity. If provided, system maintains conversation context across queries."
+      },
+      "parameters": {
+        "type": "object",
+        "description": "Flow-specific parameters to customize execution",
+        "properties": {
+          "temperature": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 2.0,
+            "description": "LLM temperature (0=deterministic, 2=creative)"
+          },
+          "max_tokens": {
+            "type": "integer",
+            "description": "Maximum tokens in response"
+          },
+          "stream": {
+            "type": "boolean",
+            "description": "Enable streaming response (if supported by backend)"
+          }
+        }
+      },
+      "include_routing_metadata": {
+        "type": "boolean",
+        "description": "Include routing decision metadata in response (backend selected, scores, fallback info)",
+        "default": true
+      }
+    },
+    "required": ["question"]
+  }
+}
+```
 
 ---
 
-## 6. Performance Optimization
+## 💻 Implementation Pattern
 
-### 6.1 Caching Strategy
-
-**Flow Discovery Cache**:
-- TTL: 5 minutes (configurable)
-- Invalidation: On backend reconnect
-- Warm-up: Periodic background refresh
-
-**Backend Health Cache**:
-- TTL: 30 seconds
-- Fast path: Return cached health for routing decisions
-
-**Performance Metrics Cache**:
-- Rolling window: Last 100 executions per backend
-- Metrics: Latency (p50, p95), success rate, quality scores
-
-### 6.2 Parallel Queries (Future Enhancement)
-
-For high-confidence routing (score > 0.9), execute on single backend.
-For low-confidence routing (score < 0.6), execute on top 2 backends in parallel:
-- Return fastest successful response
-- Use slower response for performance learning
-
----
-
-## 7. MCP Tool Schema
-
-### 7.1 Tool Definition
+### **Handler Function**
 
 ```python
-types.Tool(
-    name="universal_query",
-    description="""Query AI workflows across all backends with intelligent routing.
+from mcp import types
+from agentic_flywheel.backends.registry import BackendRegistry
+from agentic_flywheel.backends.base import BackendType
+from agentic_flywheel.integrations import trace_mcp_tool, get_current_trace_id, LangfuseObservation
 
-    Automatically selects the optimal backend (Flowise, Langflow, etc.) based on:
-    - Question intent and complexity
-    - Backend health and availability
-    - Historical performance metrics
-    - Flow capabilities
+@app.call_tool()
+@trace_mcp_tool("universal_query")
+async def handle_universal_query(name: str, arguments: dict) -> List[types.TextContent]:
+    """
+    Universal query handler with intelligent backend routing
+    """
+    trace_id = get_current_trace_id()
 
-    Supports automatic fallback if primary backend fails.
-    """,
-    inputSchema={
-        "type": "object",
-        "properties": {
-            "question": {
-                "type": "string",
-                "description": "Question or prompt to send to AI workflow"
-            },
-            "intent": {
-                "type": "string",
-                "description": "Optional explicit intent (creative-orientation, technical-analysis, etc.)",
-                "enum": [
-                    "creative-orientation",
-                    "technical-analysis",
-                    "structural-thinking",
-                    "conversation",
-                    "rag-retrieval",
-                    "data-processing",
-                    "auto"
-                ],
-                "default": "auto"
-            },
-            "backend": {
-                "type": "string",
-                "description": "Optional backend selection (auto = intelligent routing)",
-                "enum": ["auto", "flowise", "langflow"],
-                "default": "auto"
-            },
-            "session_id": {
-                "type": "string",
-                "description": "Session ID for conversation continuity across queries"
-            },
-            "parameters": {
-                "type": "object",
-                "description": "Flow-specific parameters (temperature, max_tokens, etc.)",
-                "properties": {
-                    "temperature": {"type": "number", "minimum": 0, "maximum": 2},
-                    "max_tokens": {"type": "integer", "minimum": 1},
-                    "stream": {"type": "boolean"}
-                }
-            },
-            "timeout": {
-                "type": "number",
-                "description": "Execution timeout in seconds (default: 30)",
-                "minimum": 1,
-                "maximum": 120,
-                "default": 30
-            }
-        },
-        "required": ["question"]
-    }
-)
-```
+    # Extract arguments
+    question = arguments["question"]
+    backend_pref = arguments.get("backend", "auto")
+    session_id = arguments.get("session_id")
+    intent_override = arguments.get("intent")
+    parameters = arguments.get("parameters", {})
+    include_metadata = arguments.get("include_routing_metadata", True)
 
-### 7.2 Response Format
+    # Initialize backend registry
+    registry = BackendRegistry()
+    await registry.discover_backends()
 
-**Success Response**:
-```json
-{
-  "result": "AI workflow response text",
-  "session_id": "session_abc123",
-  "_mcp_metadata": {
-    "backend_used": "langflow",
-    "flow_id": "langflow_creative_flow_001",
-    "flow_name": "Creative Orientation Assistant",
-    "routing_score": 0.87,
-    "routing_breakdown": {
-      "flow_match": 0.9,
-      "health": 1.0,
-      "performance": 0.8,
-      "capability": 0.8
-    },
-    "intent_classified": "creative-orientation",
-    "intent_confidence": 0.92,
-    "execution_time_ms": 1847,
-    "fallback_used": false,
-    "attempt": 1
-  }
-}
-```
+    # Get available backends
+    available_backends = registry.get_healthy_backends()
 
-**Error Response**:
-```json
-{
-  "error": "All backends failed",
-  "attempts": 2,
-  "backends_tried": ["langflow", "flowise"],
-  "last_error": "Connection timeout",
-  "_mcp_metadata": {
-    "routing_attempted": true,
-    "backends_available": ["langflow", "flowise"],
-    "all_healthy": false
-  }
-}
+    if not available_backends:
+        return [types.TextContent(
+            type="text",
+            text="❌ Error: No healthy backends available. All AI workflow platforms are currently offline."
+        )]
+
+    # Intent classification
+    if intent_override:
+        intent = intent_override
+    else:
+        intent = await classify_intent(question) # Placeholder for actual classification
+        await LangfuseObservation.add_intent_classification(
+            trace_id, intent, 0.95, extract_keywords(question) # Placeholder for keyword extraction
+        )
+
+    # Backend selection
+    if backend_pref == "auto":
+        # Intelligent routing
+        backend, score = await select_optimal_backend(
+            available_backends, intent, question # Placeholder for actual selection logic
+        )
+        routing_method = "intelligent"
+    else:
+        # Explicit backend selection
+        backend = registry.get_backend(BackendType(backend_pref))
+        if not backend or not await backend.health_check():
+            return [types.TextContent(
+                type="text",
+                text=f"❌ Error: Requested backend '{backend_pref}' is unavailable or unhealthy."
+            )]
+        score = 1.0
+        routing_method = "explicit"
+
+    await LangfuseObservation.add_flow_selection(
+        trace_id,
+        backend.backend_type.value,
+        f"{backend.backend_type.value} backend",
+        backend.backend_type.value,
+        f"Selected via {routing_method} routing (score: {score:.2f})"
+    )
+
+    # Find best matching flow on selected backend
+    flows = await backend.discover_flows()
+    matching_flows = [f for f in flows if intent in f.intent_keywords]
+
+    if not matching_flows:
+        # Fallback to generic flow or return error
+        return [types.TextContent(
+            type="text",
+            text=f"⚠️ No matching flows found for intent '{intent}' on {backend.backend_type.value}. Please rephrase your question or try a different backend."
+        )]
+
+    selected_flow = matching_flows[0]  # Best match
+
+    # Execute flow
+    start_time = time.time()
+
+    try:
+        result = await backend.execute_flow(
+            flow_id=selected_flow.backend_specific_id,
+            input_data={"question": question},
+            parameters=parameters,
+            session_id=session_id
+        )
+
+        duration_ms = (time.time() - start_time) * 1000
+
+        await LangfuseObservation.add_execution(
+            trace_id,
+            {"question": question, "parameters": parameters},
+            result,
+            duration_ms
+        )
+
+        # Record performance for future routing
+        record_performance(
+            backend.backend_type.value,
+            intent,
+            duration_ms,
+            success=True
+        )
+
+        # Format response
+        response_text = format_universal_response(
+            result=result,
+            backend=backend.backend_type.value,
+            flow_name=selected_flow.name,
+            routing_score=score,
+            routing_method=routing_method,
+            duration_ms=duration_ms,
+            include_metadata=include_metadata
+        )
+
+        return [types.TextContent(type="text", text=response_text)]
+
+    except Exception as e:
+        # Execution failed, try fallback
+        await LangfuseObservation.add_error(
+            trace_id,
+            type(e).__name__,
+            str(e),
+            traceback.format_exc()
+        )
+
+        # Record failure
+        duration_ms = (time.time() - start_time) * 1000
+        record_performance(
+            backend.backend_type.value,
+            intent,
+            duration_ms,
+            success=False
+        )
+
+        # Attempt fallback to other backends
+        remaining_backends = [b for b in available_backends if b != backend]
+
+        if remaining_backends:
+            # Try next best backend
+            return await execute_with_fallback(
+                remaining_backends,
+                question,
+                intent,
+                parameters,
+                session_id,
+                trace_id
+            )
+        else:
+            return [types.TextContent(
+                type="text",
+                text=f"❌ Error: Query execution failed on {backend.backend_type.value} and no fallback backends available.\n\nError: {str(e)}"
+            )]
 ```
 
 ---
 
-## 8. Integration Contract
+## 📋 Response Format
 
-### 8.1 Must Support
+### **With Metadata** (default)
 
-1. ✅ **Standard MCP Tool Interface**: Accept `name: str, arguments: dict`
-2. ✅ **Return MCP Response**: `List[types.TextContent]`
-3. ✅ **BackendRegistry Integration**: Use global registry for backend discovery
-4. ✅ **Automatic + Manual Modes**: Support both "auto" routing and explicit backend selection
-5. ✅ **Error Handling**: Graceful failures, never raise unhandled exceptions
-6. ✅ **Metadata Enrichment**: Include routing decisions in response
-7. ✅ **Session Support**: Accept and propagate session_id
-8. ✅ **Timeout Handling**: Respect user-provided timeout values
+```markdown
+✅ **Creative Orientation Guidance**
 
-### 8.2 Optional Integrations
-
-1. **Langfuse Tracing**: If available, trace routing decisions and execution
-2. **Redis State**: If available, persist session context
-3. **Performance Metrics**: Store execution metrics for future routing decisions
-
-### 8.3 Dependencies
-
-**Required**:
-- `BackendRegistry` (backends/registry.py)
-- At least one backend implementation (FlowiseBackend or LangflowBackend)
-
-**Optional**:
-- `LangfuseTracerManager` (integrations/langfuse_tracer.py)
-- `RedisStateManager` (integrations/redis_state.py)
+Structural tension is the gap between current reality and desired outcome...
 
 ---
 
-## 9. Testing Strategy
+**Routing Info**:
+- Backend: flowise
+- Flow: csv2507 (Creative Orientation)
+- Selection: Intelligent (score: 0.92)
+- Execution: 1,235ms
+- Session: abc123
+```
 
-### 9.1 Unit Tests
+### **Without Metadata** (minimal)
 
-**Coverage Requirements**: >80%
+```markdown
+Structural tension is the gap between current reality and desired outcome...
+```
+
+---
+
+## 🧪 Testing Strategy
+
+### **Unit Tests** (tests/test_universal_query.py)
 
 **Test Categories**:
 
-1. **Intent Classification** (5 tests):
-   - Test each intent category recognition
-   - Test multi-keyword matching
-   - Test low-confidence classification
-   - Test edge cases (empty string, very long text)
+1. **Intent Classification** (3 tests)
+   - Automatic intent detection from question
+   - Intent override via parameter
+   - Unknown intent handling
 
-2. **Backend Scoring** (8 tests):
-   - Test flow match scoring
-   - Test health score integration
-   - Test performance score calculation
-   - Test capability scoring
-   - Test combined score formula
-   - Test score ranking
-   - Test tie-breaking
+2. **Backend Selection** (5 tests)
+   - Auto routing selects highest scoring backend
+   - Explicit backend selection (flowise/langflow)
+   - Health check influences selection
+   - Performance history influences selection
+   - No healthy backends error
 
-3. **Backend Selection** (6 tests):
-   - Test auto-selection (highest score wins)
-   - Test explicit backend override
-   - Test no backends available error
-   - Test single backend scenario
-   - Test multiple backends with clear winner
-   - Test multiple backends with similar scores
+3. **Flow Matching** (3 tests)
+   - Matching flows found for intent
+   - No matching flows fallback
+   - Best flow selection from multiple matches
 
-4. **Fallback Logic** (5 tests):
-   - Test primary backend success (no fallback)
-   - Test primary failure → secondary success
-   - Test all backends fail
-   - Test timeout handling
-   - Test retry logic
+4. **Execution** (4 tests)
+   - Successful query execution
+   - Parameter passing to backend
+   - Session continuity
+   - Result formatting
 
-5. **MCP Tool Integration** (4 tests):
-   - Test tool invocation with minimal args
-   - Test tool invocation with all args
-   - Test tool response format
-   - Test tool error format
+5. **Fallback** (4 tests)
+   - Primary backend failure triggers fallback
+   - Fallback chain exhausted error
+   - All backends unhealthy error
+   - Partial backend availability
 
-6. **Session Continuity** (3 tests):
-   - Test session_id propagation
-   - Test session creation
-   - Test cross-query context
+6. **Performance Tracking** (2 tests)
+   - Performance recorded after execution
+   - Historical performance influences routing
 
-### 9.2 Integration Tests
+7. **Metadata** (2 tests)
+   - Metadata included by default
+   - Metadata excluded when requested
 
-1. **Multi-Backend Scenario**:
-   - Set up mock Flowise + Langflow backends
-   - Send queries requiring different intents
-   - Verify correct routing decisions
-
-2. **Fallback Scenario**:
-   - Simulate primary backend failure
-   - Verify fallback to secondary
-   - Verify metadata reflects fallback
-
-3. **Performance Test**:
-   - 100 sequential queries
-   - Verify routing overhead < 200ms
-   - Verify caching effectiveness
+**Total**: 23 comprehensive tests
 
 ---
 
-## 10. Success Metrics
+## 🎯 Success Metrics
 
-### 10.1 Functional Success
+### **Functional Success**
+- ✅ Routing accuracy >90% (selects optimal backend)
+- ✅ Fallback success rate >95% (recovers from primary failures)
+- ✅ Routing overhead <200ms
+- ✅ All error conditions handled gracefully
+- ✅ Session continuity maintained across backends
 
-- ✅ **Routing Accuracy**: 90%+ correct backend selection (measured against manual labels)
-- ✅ **Availability**: 99%+ query success rate (with fallback)
-- ✅ **Latency**: <200ms routing overhead (excluding backend execution)
-- ✅ **Fallback Rate**: <5% of queries require fallback
+### **User Experience Success**
+- ✅ Single tool replaces multiple platform-specific tools
+- ✅ Users never need to know which backend handles query
+- ✅ Routing decisions transparent and explainable
+- ✅ Fallback invisible to users (seamless)
+- ✅ Performance acceptable (no perceptible slowdown)
 
-### 10.2 User Experience Success
-
-- ✅ **Transparency**: Users can see which backend handled their query
-- ✅ **Simplicity**: Single tool interface for all backends
-- ✅ **Reliability**: No manual intervention needed for backend selection
-- ✅ **Observability**: Full trace of routing decisions available
-
-### 10.3 Integration Success
-
-- ✅ **Zero Breaking Changes**: Existing `flowise_query` tool continues to work
-- ✅ **Backward Compatible**: New tool coexists with legacy tools
-- ✅ **Composable**: Works with tracing, state persistence, admin tools
-
----
-
-## 11. Implementation Phases
-
-### Phase 1: Core Routing (This Task)
-- Intent classification
-- Backend scoring and selection
-- Basic fallback logic
-- MCP tool integration
-- Unit tests
-
-### Phase 2: Performance Optimization (Future)
-- Advanced caching strategies
-- Parallel query execution
-- ML-based intent classification
-- Performance metric collection
-
-### Phase 3: Advanced Features (Future)
-- Multi-turn conversation optimization
-- Context-aware routing (use previous queries to inform routing)
-- User preference learning
-- A/B testing framework for routing strategies
+### **Integration Success**
+- ✅ Works with BackendRegistry
+- ✅ Integrates with langfuse_tracer (if available)
+- ✅ Supports redis_state (if available)
+- ✅ Standard MCP tool schema
+- ✅ Compatible with existing flowise_query usage patterns
 
 ---
 
-## 12. RISE Alignment
+## 🔮 Future Enhancements
 
-**Reverse-Engineering**: Traced from user desire for "simple, unified AI queries"
-**Intent-Extraction**: Users want platform complexity hidden, optimal results delivered
-**Specification**: Implementation-agnostic patterns enable multiple implementations
-**Export**: Clean, composable interface integrates naturally with ecosystem
+### **Phase 2: Advanced Routing**
+- A/B testing support (route % of queries to test backends)
+- Cost-aware routing (prefer cheaper backends)
+- Latency-aware routing (prefer fastest for time-sensitive queries)
+- Load balancing across multiple backend instances
 
-**Creative Advancement**: Bridges gap from "manual platform selection" to "intelligent automatic orchestration"
+### **Phase 3: Multi-Backend Queries**
+- Parallel query execution (use fastest response)
+- Consensus queries (query all backends, merge responses)
+- Validation queries (cross-check answers across backends)
 
 ---
 
-**Status**: ✅ Implementation Ready
-**Estimated Implementation Time**: 3-4 hours
-**Complexity**: Medium-High
-**Next Steps**: Implement routing logic, create tests, integrate with MCP server
+## 📚 Dependencies
+
+### **Runtime Dependencies**
+- `BackendRegistry` - Backend discovery and management
+- `FlowBackend` implementations - Flowise, Langflow adapters
+- `classify_intent()` - Intent classification function
+- `langfuse_tracer` (optional) - Observability integration
+- Standard library: `time`, `asyncio`, `traceback`
+
+### **Development Dependencies**
+- `pytest` - Unit testing
+- `pytest-asyncio` - Async test support
+- `pytest-mock` - Mocking backend responses
+
+---
+
+## ✨ Alignment with RISE Principles
+
+### **Reverse-Engineering**:
+This spec reverse-engineers successful multi-platform query patterns from user needs and system capabilities.
+
+### **Intent-Extraction**:
+The intent is **platform-agnostic AI querying** — users want to ask questions, not manage backend infrastructure.
+
+### **Specification**:
+This document provides implementation-agnostic patterns. Another LLM could implement from this spec alone.
+
+### **Export**:
+The universal_query tool exports a clean, simple interface that hides backend complexity while exposing routing transparency.
+
+---
+
+## 🌟 Creative Advancement Scenario
+
+**Before Universal Query** (Current Reality):
+> User: "I want to ask about structural tension"
+> System: "Which backend? flowise_query or langflow_query?"
+> User: "Uh... I don't know. Which is better?"
+> System: "Depends on your needs..."
+
+**After Universal Query** (Desired Outcome):
+> User: "What is structural tension?"
+> System: *Automatically routes to Flowise (highest score for creative-orientation), executes, returns:*
+> "Structural tension is the gap between current reality and desired outcome..."
+> *(Routing: flowise, score: 0.92, 1.2s)*
+
+**The Gap**: Between "user must understand backends" and "system handles backend selection intelligently" — universal query bridges this gap naturally.
+
+---
+
+**Specification Complete** ✅
+**Ready for Implementation**: `universal_mcp_server.py` integration
+**Integration Target**: All MCP servers in agentic_flywheel
+**Creative Outcome**: Users create AI-powered solutions without platform concerns
