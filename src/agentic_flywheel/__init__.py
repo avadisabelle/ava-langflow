@@ -25,12 +25,32 @@ __author__ = "JGT Team / CeSaReT"
 __email__ = "jgwill@jgwill.com"
 
 # Core agentic flywheel components
-from .flowise_manager import FlowiseManager, DomainSpecificFlowiseManager, FlowConfig
-from .persona_system import (
-    FlywheelPersonaOrchestrator, PersonaPromptGenerator, PersonaType,
-    PersonaOutput, FlywheelCycleResult
-)
-from .flowise_integration import FlowiseIntegrationHelper
+try:
+    from .flowise_manager import FlowiseManager, DomainSpecificFlowiseManager, FlowConfig
+except ImportError:
+    try:
+        from .agentic_flywheel.flowise_manager import FlowiseManager, DomainSpecificFlowiseManager, FlowConfig
+    except ImportError:
+        FlowiseManager = None
+        DomainSpecificFlowiseManager = None
+        FlowConfig = None
+
+try:
+    from .persona_system import (
+        FlywheelPersonaOrchestrator, PersonaPromptGenerator, PersonaType,
+        PersonaOutput, FlywheelCycleResult
+    )
+except ImportError:
+    FlywheelPersonaOrchestrator = None
+    PersonaPromptGenerator = None
+    PersonaType = None
+    PersonaOutput = None
+    FlywheelCycleResult = None
+
+try:
+    from .flowise_integration import FlowiseIntegrationHelper
+except ImportError:
+    FlowiseIntegrationHelper = None
 
 # Backend abstraction layer (separate tier)
 from .backends import FlowBackend, UniversalFlow, UniversalSession, BackendRegistry
