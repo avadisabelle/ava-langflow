@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+	   "github_avadisabelle": {
+      "command": "npx",
+      "args": [
+	"-y",
+	"@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN_AVADISABELLE}"       
+      }
+    },
+    "claude-plan-miette-perspective-chart": {     
+	 "command": "npx", 
+	 "args": ["-y", "coaia-memory@2.2.12", "--memory-path", "/src/memories/claude-plan-miette.jsonl"]
+    },
+    "coaiapy_aetherial": {
+      "command": "/opt/anaconda3/envs/src/bin/coaiapy-mcp",
+      "args": [ ],
+      "env": { 
+              "COAIAPY_ENV_PATH":"/src/.env"
+        }
+    }
+  }
+}
+

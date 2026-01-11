@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "claude-plan-miette-perspective-chart": {     
+	 "command": "npx", 
+	 "args": ["-y", "coaia-memory@2.2.12", "--memory-path", "/src/memories/claude-plan-miette.jsonl"]
+    }
+  }
+}
+

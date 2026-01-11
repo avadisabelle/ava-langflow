@@ -255,7 +255,7 @@ async def execute_with_fallback(
             continue  # Skip backends with no matching flows
 
         try:
-            result = await backend.execute_flow(...)
+            result = await backend.execute_flow(...) # Placeholder for actual execution
             result["_routing"]["backend_used"] = backend.backend_type.value
             result["_routing"]["score"] = score
             result["_routing"]["fallback_used"] = False
@@ -317,7 +317,7 @@ def record_performance(backend: str, intent: str, latency_ms: float, success: bo
 ```python
 # Query all backends in parallel, use fastest response
 async def parallel_query(backends: List[FlowBackend], query: str):
-    tasks = [backend.execute_flow(...) for backend in backends]
+    tasks = [backend.execute_flow(...) for backend in backends] # Placeholder for actual execution
 
     # Wait for first success
     for task in asyncio.as_completed(tasks):
@@ -440,16 +440,16 @@ async def handle_universal_query(name: str, arguments: dict) -> List[types.TextC
     if intent_override:
         intent = intent_override
     else:
-        intent = await classify_intent(question)
+        intent = await classify_intent(question) # Placeholder for actual classification
         await LangfuseObservation.add_intent_classification(
-            trace_id, intent, 0.95, extract_keywords(question)
+            trace_id, intent, 0.95, extract_keywords(question) # Placeholder for keyword extraction
         )
 
     # Backend selection
     if backend_pref == "auto":
         # Intelligent routing
         backend, score = await select_optimal_backend(
-            available_backends, intent, question
+            available_backends, intent, question # Placeholder for actual selection logic
         )
         routing_method = "intelligent"
     else:

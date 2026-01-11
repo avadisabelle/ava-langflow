@@ -19,9 +19,13 @@ from typing import Any, Dict
 
 # Import components under test
 import sys
-sys.path.insert(0, '/home/user/ava-langflow/src/agentic_flywheel')
+from pathlib import Path
 
-from integrations.langfuse_tracer import (
+# Add the src directory to the path
+src_path = Path(__file__).parent.parent / "src"
+sys.path.insert(0, str(src_path))
+
+from agentic_flywheel.integrations.langfuse_tracer import (
     trace_mcp_tool,
     get_current_trace_id,
     LangfuseObservation,

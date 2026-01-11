@@ -15,12 +15,14 @@ try:
     REDIS_AVAILABLE = True
 except ImportError:
     REDIS_AVAILABLE = False
-    logger.warning("redis package not available - Redis persistence will be disabled")
+    logging.warning("redis package not available - Redis persistence will be disabled")
 
 try:
     from ..backends.base import UniversalSession, FlowStatus, BackendType
 except ImportError:
+    # This try/except is for when this file is run directly for testing
     from agentic_flywheel.backends.base import UniversalSession, FlowStatus, BackendType
+
 
 logger = logging.getLogger(__name__)
 
