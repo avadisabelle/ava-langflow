@@ -200,6 +200,10 @@ export const lazyIconsMapping = {
     import("@/icons/GitLoader").then((mod) => ({ default: mod.GitLoaderIcon })),
   Github: () =>
     import("@/icons/github").then((mod) => ({ default: mod.GithubIcon })),
+  GithubComposio: () =>
+    import("@/icons/GithubComposio").then((mod) => ({
+      default: mod.GithubIcon,
+    })),
   Glean: () =>
     import("@/icons/Glean").then((mod) => ({ default: mod.GleanIcon })),
   GlobeOk: () =>
@@ -274,10 +278,20 @@ export const lazyIconsMapping = {
     import("@/icons/HuggingFace").then((mod) => ({
       default: mod.HuggingFaceIcon,
     })),
+  IBM: () =>
+    import("@/icons/IBM").then((mod) => ({
+      default: mod.IBMIcon,
+    })),
+  WatsonxAI: () =>
+    import("@/icons/IBM").then((mod) => ({
+      default: mod.WatsonxAiIcon,
+    })),
   Icosa: () =>
     import("@/icons/Icosa").then((mod) => ({ default: mod.IcosaIcon })),
   IFixIt: () =>
     import("@/icons/IFixIt").then((mod) => ({ default: mod.IFixIcon })),
+  Indicator: () =>
+    import("@/icons/Indicator").then((mod) => ({ default: mod.IndicatorIcon })),
   Instagram: () =>
     import("@/icons/Instagram").then((mod) => ({ default: mod.InstagramIcon })),
   javascript: () =>
@@ -463,24 +477,12 @@ export const lazyIconsMapping = {
     import("@/icons/vectorstores").then((mod) => ({
       default: mod.VectorStoresIcon,
     })),
-  VertexAI: () =>
-    import("@/icons/VertexAI").then((mod) => ({ default: mod.VertexAIIcon })),
-  WatsonxAI: () =>
-    import("@/icons/IBMWatsonx").then((mod) => ({
-      default: mod.WatsonxAiIcon,
-    })),
-  Weaviate: () =>
-    import("@/icons/Weaviate").then((mod) => ({ default: mod.WeaviateIcon })),
-  Wikipedia: () =>
-    import("@/icons/Wikipedia/Wikipedia").then((mod) => ({
-      default: mod.default,
-    })),
   Windsurf: () =>
     import("@/icons/Windsurf").then((mod) => ({ default: mod.WindsurfIcon })),
   Wolfram: () =>
     import("@/icons/Wolfram/Wolfram").then((mod) => ({ default: mod.default })),
   xAI: () => import("@/icons/xAI").then((mod) => ({ default: mod.XAIIcon })),
-  youTube: () =>
+  YouTube: () =>
     import("@/icons/Youtube").then((mod) => ({ default: mod.YoutubeIcon })),
   ZepMemory: () =>
     import("@/icons/ZepMemory").then((mod) => ({ default: mod.ZepMemoryIcon })),
