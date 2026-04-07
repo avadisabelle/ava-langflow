@@ -1,6 +1,6 @@
 # 🌟 ava-langflow: Universal Multi-Backend Narrative Router (2025-12-31)
 
-**Reference**: See main unified mission at `/workspace/langgraph/MISSION_251231.md`
+**Reference**: See main unified mission at `/workspace/repos/avadisabelle/ava-langgraph/MISSION_251231.md`
 
 ## Your Role in the Stack
 

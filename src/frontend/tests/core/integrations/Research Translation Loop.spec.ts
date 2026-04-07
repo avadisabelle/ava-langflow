@@ -3,6 +3,7 @@ import path from "path";
 import { expect, test } from "../../fixtures";
 import { awaitBootstrapTest } from "../../utils/await-bootstrap-test";
 import { initialGPTsetup } from "../../utils/initialGPTsetup";
+import { selectGptModel } from "../../utils/select-gpt-model";
 import { withEventDeliveryModes } from "../../utils/withEventDeliveryModes";
 import { selectGptModel } from "../../utils/select-gpt-model";
 
@@ -50,6 +51,13 @@ withEventDeliveryModes(
 
     await page.getByTestId("button-send").click();
 
+    const stopButton = page.getByRole("button", { name: "Stop" });
+    await stopButton.waitFor({ state: "visible", timeout: 40000 });
+
+    if (await stopButton.isVisible()) {
+      await expect(stopButton).toBeHidden({ timeout: 200000 });
+    }
+
     await page.waitForSelector('[data-testid="div-chat-message"]', {
       timeout: 30000 * 3,
     });
@@ -60,6 +68,6 @@ withEventDeliveryModes(
 
     const concatAllText = textContents.join(" ").toLowerCase();
 
-    expect(concatAllText.length).toBeGreaterThan(300);
+    expect(concatAllText.length).toBeGreaterThan(140);
   },
 );

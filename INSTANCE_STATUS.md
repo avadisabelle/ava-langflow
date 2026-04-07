@@ -8,7 +8,7 @@
 
 ### Instance 1: LangGraph + Narrative Intelligence
 - **Session**: AvaLangGraphHolisticNCP_2511180818
-- **Location**: `/workspace/langgraph`
+- **Location**: `/workspace/repos/avadisabelle/ava-langgraph`
 - **Branch**: `claude/session-work-01E62YJPhqtUHZtEfhjuovnh`
 - **Status**: ✅ QA testing complete (534-line report)
 - **Current Task**: Ready for commit and push
@@ -17,7 +17,7 @@
 
 ### Instance 2: LangChain + Langfuse
 - **Session**: avaLangChainComponents_2511180702
-- **Location**: `/workspace/langchain`
+- **Location**: `/workspace/repos/avadisabelle/ava-langchain`
 - **Branch**: `claude/setup-langfuse-tracing-01N29jz7X4qAAhGXkkrXkqSB`
 - **Status**: ✅ Integration complete with 529-line guide
 - **Current Task**: Ready for commit and push
@@ -113,7 +113,7 @@ All instances have completed their current phase and are ready to commit.
 
 ### Phase 2: Shared Utilities (This Week)
 - [ ] **Instance 2**: Extract Langfuse utilities to shared package
-  - Create `/workspace/langchain/libs/langfuse-utils/`
+  - Create `/workspace/repos/avadisabelle/ava-langchain/libs/langfuse-utils/`
   - Export common decorators and handlers
   - Document usage patterns
 - [ ] **Instance 3**: Adopt shared Langfuse utilities

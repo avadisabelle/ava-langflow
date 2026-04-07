@@ -19,14 +19,14 @@ The main analysis instance has:
 ## 📋 Instance Quick Reference
 
 ### Are you working on LangGraph?
-**Location**: `/workspace/langgraph`
+**Location**: `/workspace/repos/avadisabelle/ava-langgraph`
 **Your work**: Narrative intelligence library with NCP support
 **Status**: ✅ Complete - ready to commit
 **Commit message**: See CROSS_INSTANCE_COORDINATION.md → Instance 1
 **Next steps**: Create NCP integration examples
 
 ### Are you working on LangChain?
-**Location**: `/workspace/langchain`
+**Location**: `/workspace/repos/avadisabelle/ava-langchain`
 **Your work**: Langfuse tracing integration
 **Status**: ✅ Complete - ready to commit
 **Commit message**: See CROSS_INSTANCE_COORDINATION.md → Instance 2
@@ -57,7 +57,7 @@ Open `CROSS_INSTANCE_COORDINATION.md` and find your instance section (1-4)
 Use the suggested commit message from the coordination doc
 ```bash
 # Example for Instance 1
-cd /workspace/langgraph
+cd /workspace/repos/avadisabelle/ava-langgraph
 git add libs/narrative-intelligence/
 git commit -m "[see coordination doc for full message]"
 git push origin [your-branch-name]
