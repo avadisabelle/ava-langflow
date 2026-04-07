@@ -33,12 +33,12 @@ Based on LAUNCH scripts found:
 
 1. **AvaLangGraphHolisticNCP_2511180818**
    - Working on: LangGraph + Narrative Intelligence
-   - Location: `/workspace/langgraph`
+   - Location: `/workspace/repos/avadisabelle/ava-langgraph`
    - Branch: `claude/session-work-01E62YJPhqtUHZtEfhjuovnh`
 
 2. **avaLangChainComponents_2511180702**
    - Working on: LangChain + Langfuse tracing
-   - Location: `/workspace/langchain`
+   - Location: `/workspace/repos/avadisabelle/ava-langchain`
    - Branch: `claude/setup-langfuse-tracing-01N29jz7X4qAAhGXkkrXkqSB`
 
 3. **avaLangflowAgenticFlywheel_2511180446**
@@ -66,7 +66,7 @@ Based on LAUNCH scripts found:
 
 **Suggested Commit**:
 ```bash
-cd /workspace/langgraph
+cd /workspace/repos/avadisabelle/ava-langgraph
 git add libs/narrative-intelligence/
 git commit -m "feat(narrative-intelligence): Add comprehensive QA testing and NCP integration
 
@@ -89,13 +89,13 @@ git push origin claude/session-work-01E62YJPhqtUHZtEfhjuovnh
 
 **Next Tasks**:
 1. Extract Langfuse configuration to shared utility module
-2. Create `/workspace/langchain/libs/langfuse-utils/` package
+2. Create `/workspace/repos/avadisabelle/ava-langchain/libs/langfuse-utils/` package
 3. Export common tracing decorators and handlers
 4. Document shared configuration patterns
 
 **Suggested Commit**:
 ```bash
-cd /workspace/langchain
+cd /workspace/repos/avadisabelle/ava-langchain
 git add libs/core/langchain_core/callbacks/langfuse_handler.py
 git add LANGFUSE_INTEGRATION_GUIDE.md
 git add temp_test_tracing.py

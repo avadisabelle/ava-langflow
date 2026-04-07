@@ -12,7 +12,7 @@
 This document outlines ava-langflow's readiness to integrate shared Langfuse utilities from the LangChain repository once Instance 2 extracts them. All preparation work is complete, and integration can proceed immediately upon utility availability.
 
 **Current State**: ✅ Langfuse integrated locally in ava-langflow
-**Target State**: Use shared utilities from `/workspace/langchain/libs/langfuse-utils/`
+**Target State**: Use shared utilities from `/workspace/repos/avadisabelle/ava-langchain/libs/langfuse-utils/`
 **Migration Strategy**: Gradual replacement with backward compatibility
 
 ---
@@ -52,7 +52,7 @@ This document outlines ava-langflow's readiness to integrate shared Langfuse uti
 ### Anticipated Package Structure
 
 ```
-/workspace/langchain/libs/langfuse-utils/
+/workspace/repos/avadisabelle/ava-langchain/libs/langfuse-utils/
 ├── langfuse_utils/
 │   ├── __init__.py
 │   ├── callback_handler.py    # CoaiapyLangfuseCallbackHandler
@@ -88,7 +88,7 @@ From Instance 2's work (529-line integration guide):
 ```toml
 dependencies = [
     # ... existing dependencies
-    "langfuse-utils @ file:///workspace/langchain/libs/langfuse-utils",
+    "langfuse-utils @ file:///workspace/repos/avadisabelle/ava-langchain/libs/langfuse-utils",
     # OR if published to PyPI:
     # "langfuse-utils>=1.0.0"
 ]
