@@ -1,6 +1,6 @@
 # 🌟 ava-langflow: Universal Multi-Backend Narrative Router (2025-12-31)
 
-**Reference**: See main unified mission at `/workspace/langgraph/MISSION_251231.md`
+**Reference**: See main unified mission at `/workspace/repos/avadisabelle/ava-langgraph/MISSION_251231.md`
 
 ## Your Role in the Stack
 
@@ -605,3 +605,5 @@ assert len(updated["routing_history"]) > len(state["routing_history"])
 **Your Focus**: Making routing narrative-aware with three-universe processing
 **Success Metric**: Every routing decision considers which universe should lead
 **Downstream Consumer**: Miadi-46 platform (GitHub webhook events)
+
+

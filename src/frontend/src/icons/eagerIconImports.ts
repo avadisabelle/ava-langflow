@@ -52,7 +52,7 @@ import { HCDIcon } from "@/icons/HCD";
 import { HomeAssistantIcon } from "@/icons/HomeAssistant";
 import { HuggingFaceIcon } from "@/icons/HuggingFace";
 import { HackerNewsIcon } from "@/icons/hackerNews";
-import { WatsonxAiIcon } from "@/icons/IBMWatsonx";
+import { IBMIcon, WatsonxAiIcon } from "@/icons/IBM";
 import { IcosaIcon } from "@/icons/Icosa";
 import { IFixIcon } from "@/icons/IFixIt";
 import { JSIcon } from "@/icons/JSicon";
@@ -106,12 +106,14 @@ import { UnstructuredIcon } from "@/icons/Unstructured";
 import { UpstashSvgIcon } from "@/icons/Upstash";
 import { VectaraIcon } from "@/icons/VectaraIcon";
 import { VertexAIIcon } from "@/icons/VertexAI";
+import { VllmIcon } from "@/icons/vLLM";
 import { VLMRunIcon } from "@/icons/VLMRun";
+import { VllmIcon } from "@/icons/vLLM";
 import { WeaviateIcon } from "@/icons/Weaviate";
 import { WikipediaIcon } from "@/icons/Wikipedia";
 import { WolframIcon } from "@/icons/Wolfram";
 import { XAIIcon } from "@/icons/xAI";
-import { YouTubeSvgIcon as YouTubeIcon } from "@/icons/Youtube";
+import { YoutubeIcon as YouTubeIcon } from "@/icons/Youtube";
 import { ZepMemoryIcon } from "@/icons/ZepMemory";
 import { JigsawStackIcon } from "./JigsawStack";
 import { WindsurfIcon } from "./Windsurf";
@@ -171,6 +173,7 @@ export const eagerIconsMapping = {
   HCD: HCDIcon,
   HomeAssistant: HomeAssistantIcon,
   HuggingFace: HuggingFaceIcon,
+  IBM: IBMIcon,
   Icosa: IcosaIcon,
   IFixIt: IFixIcon,
   javascript: JSIcon,
@@ -227,6 +230,7 @@ export const eagerIconsMapping = {
   Upstash: UpstashSvgIcon,
   Vectara: VectaraIcon,
   VertexAI: VertexAIIcon,
+  vLLM: VllmIcon,
   WatsonxAI: WatsonxAiIcon,
   Weaviate: WeaviateIcon,
   Wikipedia: WikipediaIcon,
